@@ -1,4 +1,5 @@
 from flask import Flask, render_template_string
+import random
 
 app = Flask(__name__)
 
@@ -6,64 +7,42 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ultimate Fun Zone</title>
+    <title>piyush patil Infinite</title>
     <style>
-        body { background: #0a0a0a; color: #fff; text-align: center; font-family: 'Arial', sans-serif; padding: 20px; }
-        .box { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 2px solid #ff0055; display: inline-block; width: 90%; max-width: 400px; box-shadow: 0 0 20px #ff0055; }
-        input { padding: 12px; width: 85%; border-radius: 10px; border: none; margin-bottom: 20px; background: #333; color: white; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
-        button:hover { transform: scale(1.05); }
+        body { background: #050505; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
+        .box { background: rgba(20, 20, 20, 0.95); padding: 30px; border-radius: 25px; border: 2px solid #ff0055; width: 90%; max-width: 450px; box-shadow: 0 0 40px #ff0055; text-align: center; }
+        .btn { padding: 15px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 12px; color: white; }
         .roast { background: #ff0055; }
         .love { background: #00d4ff; }
         .task { background: #70ff00; color: #000; }
-        #result { margin-top: 25px; font-size: 1.2em; min-height: 80px; color: #ffeb3b; padding: 15px; border-top: 1px solid #444; }
+        #result { margin-top: 25px; font-size: 1.3em; color: #ffeb3b; padding: 15px; border-top: 2px dashed #444; }
     </style>
 </head>
 <body>
-    <h1>🔥 Fun Zone 🔥</h1>
     <div class="box">
-        <input type="text" id="name" placeholder="तुमचं नाव टाका...">
-        <div class="btn-group">
-            <button class="roast" onclick="show('roast')">Roast Me! 💀</button>
-            <button class="love" onclick="show('love')">Love Quote ❤️</button>
-            <button class="task" onclick="show('task')">Give Me Task 🎯</button>
-        </div>
-        <div id="result">येथे रिझल्ट दिसेल...</div>
+        <h1>🔥 Infinite Fun Zone 🔥</h1>
+        <input type="text" id="name" placeholder="तुमचं नाव टाका..." style="padding:10px; width:80%; border-radius:5px;">
+        <button class="btn roast" onclick="generate('roast')">Roast Me! 💀</button>
+        <button class="btn love" onclick="generate('love')">Love Quote ❤️</button>
+        <button class="btn task" onclick="generate('task')">Give Me Task 🎯</button>
+        <div id="result"></div>
     </div>
 
     <script>
-        function show(type) {
+        const parts = {
+            roast: ["तू", "तुझा चेहरा", "तुझं डोकं", "तुझी अक्कल"],
+            roast_end: ["आरशात बघून पण लाजते!", "कॉमेडी शोला पण लाजवेल!", "वाळलेल्या कांद्यापेक्षा खराब आहे!", "निसर्गाची मोठी चूक आहे!"],
+            love: ["तुझं हास्य", "तुझा स्वभाव", "तुझं मन", "तुझी मैत्री"],
+            love_end: ["सगळ्यात सुंदर आहे!", "कोणाचंही हृदय जिंकू शकतं!", "सोन्यासारखं चमकतंय!", "देवदूतासारखं भारी आहे!"],
+            task: ["पुढच्या ५ मिनिटांत", "आज दिवसभरात", "लगेच आताच"],
+            task_end: ["एक सेल्फी काढून स्टेटस ठेव!", "कोणीतरी फनी गाणं गा!", "एखाद्याला 'आय लव्ह यू' मेसेज कर!", "१० वेळा गोल फिरून दाखव!"]
+        };
+
+        function generate(type) {
             let name = document.getElementById('name').value || "दोस्ता";
-            let data = {
-                roast: [
-                    "तुला बघून वाटतं निसर्गाने काहीतरी भलतंच बनवलंय!", 
-                    "तू आरशात बघितला की आरसा पण घाबरून फुटून जातो!",
-                    "तुझं डोकं आणि रिकामी जागा यात जास्त फरक नाहीये.",
-                    "तू कॉमेडी शोमध्ये जाण्याची गरज नाही, तुझा चेहराच पुरेसा आहे!",
-                    "देवाने तुला बनवताना ओव्हरटाइम केला होता आणि शेवटी कंटाळून सोडून दिलं!",
-                    "तुझ्यापेक्षा चांगला मेंदू तर एका वाळलेल्या कांद्याला असेल!"
-                ],
-                love: [
-                    "प्रेम म्हणजे एका दुखाचा सुखावणारा अनुभव आहे!", 
-                    "तू कितीही रागवलास तरी तुझं मन सोन्यासारखं आहे!",
-                    "तुला बघितलं की चेहऱ्यावर आपोआप हसू येतं!",
-                    "आयुष्यात तू आहेस म्हणून सगळं काही सुंदर वाटतं.",
-                    "तुझा स्वभाव एखाद्या सुंदर गाण्यासारखा आहे, जे कधीच संपू नये!",
-                    "तू जगातील सर्वात स्पेशल व्यक्ती आहेस, हे लक्षात ठेव!"
-                ],
-                task: [
-                    "पुढच्या ५ मिनिटात एक सेल्फी काढून स्टेटस ठेव!", 
-                    "कोणाला तरी कॉल करून 'आय मिस यू' म्हण!",
-                    "एखादं फनी गाणं गाऊन व्हिडिओ बनवून टाक!",
-                    "पुढचे १० मिनिटे कोणाशीही न बोलता शांत बसून दाखव!",
-                    "तुझ्या क्रशचा फोटो बघून ३ वेळा 'आय लव्ह यू' म्हण!",
-                    "एका कागदावर 'मी बेस्ट आहे' असं लिहून आरशासमोर धर!"
-                ]
-            };
-            let arr = data[type];
-            let res = arr[Math.floor(Math.random() * arr.length)];
-            document.getElementById('result').innerText = name + ", " + res;
+            let p1 = parts[type][Math.floor(Math.random() * parts[type].length)];
+            let p2 = parts[type + "_end"][Math.floor(Math.random() * parts[type + "_end"].length)];
+            document.getElementById('result').innerText = name + ", " + p1 + " " + p2;
         }
     </script>
 </body>
