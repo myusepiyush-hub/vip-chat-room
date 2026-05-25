@@ -8,18 +8,37 @@ HTML_PAGE = """
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Piyush Website ❤️</title>
+    <title>Piyush Love Chat</title>
     <style>
-        body { background: linear-gradient(45deg, #2b0000, #000000); color: white; font-family: sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #login-screen { text-align: center; padding: 20px; border: 1px solid #ff4d4d; border-radius: 20px; }
-        button { padding: 10px 20px; background: #ff4d4d; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        body { background: #000; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #chat-box { width: 100%; max-width: 400px; height: 300px; border: 1px solid #ff4d4d; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px; background: #ff4d4d; color: white; border: none; }
     </style>
 </head>
 <body>
-    <div id="login-screen">
-        <h1>Welcome Piyush Website 💕</h1>
-        <p>सिक्रेट लव्ह चॅट</p>
+    <h1>Piyush Love Chat 💕</h1>
+    <div id="chat-box"></div>
+    <div>
+        <input type="text" id="msg" placeholder="मॅसेज लिहा...">
+        <button onclick="send()">पाठवा</button>
     </div>
+    <script>
+        function send() {
+            let msg = document.getElementById('msg').value;
+            fetch('/send', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sender: 'Piyush', message: msg, room: 'love'})
+            }).then(() => location.reload());
+        }
+        setInterval(() => {
+            fetch('/get/love').then(res => res.json()).then(data => {
+                let box = document.getElementById('chat-box');
+                box.innerHTML = data.messages.map(m => `<p><b>${m.sender}:</b> ${m.message}</p>`).join('');
+            });
+        }, 1000);
+    </script>
 </body>
 </html>
 """
@@ -34,17 +53,13 @@ def home():
 def send_msg():
     data = request.json
     room = data.get('room')
-    if room not in rooms_data:
-        rooms_data[room] = {'messages': [], 'call': None}
+    if room not in rooms_data: rooms_data[room] = {'messages': []}
     rooms_data[room]['messages'].append({"sender": data.get('sender'), "message": data.get('message')})
     return jsonify({"status": "success"})
 
 @app.route('/get/<room>')
 def get_msg(room):
-    if room not in rooms_data:
-        return jsonify({"messages": [], "call": None})
-    return jsonify({"messages": rooms_data[room]['messages'], "call": rooms_data[room]['call']})
+    return jsonify({"messages": rooms_data.get(room, {}).get('messages', [])})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
