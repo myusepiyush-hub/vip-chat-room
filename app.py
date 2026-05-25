@@ -1,5 +1,4 @@
-from flask import Flask, render_template_string, request, jsonify
-import os
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
@@ -7,50 +6,49 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VIP Chat Room</title>
+    <title>Roast & Dare Hub</title>
     <style>
-        body { background: #1a1a1a; color: #ffd700; font-family: Arial; text-align: center; padding: 20px; }
-        #chat-box { width: 100%; max-width: 400px; height: 300px; border: 2px solid #ffd700; margin: auto; overflow-y: scroll; padding: 10px; background: #000; }
-        button { padding: 10px; margin: 5px; background: #ffd700; border: none; cursor: pointer; }
+        body { background: #000; color: #fff; text-align: center; font-family: 'Arial', sans-serif; padding: 30px; }
+        .container { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 2px solid #ff4d4d; display: inline-block; width: 90%; max-width: 400px; }
+        input { padding: 10px; width: 80%; border-radius: 5px; border: none; margin-bottom: 10px; }
+        button { padding: 12px 20px; background: #ff4d4d; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        #result { margin-top: 20px; font-size: 1.2em; color: #ffeb3b; padding: 10px; min-height: 50px; }
     </style>
 </head>
 <body>
-    <h1>VIP Chat Room 👑</h1>
-    <div id="chat-box"></div>
-    <input type="text" id="msg" placeholder="मॅसेज...">
-    <button onclick="send()">पाठवा</button>
-    <br>
-    <button onclick="call()">📞 कॉल करा</button>
+    <h1>💀 Roast & Dare 💀</h1>
+    <div class="container">
+        <input type="text" id="name" placeholder="तुमचं नाव टाका...">
+        <br>
+        <button onclick="getRandom()">सांगा माझं काय होईल?</button>
+        <div id="result"></div>
+    </div>
+
     <script>
-        function send() {
-            let msg = document.getElementById('msg').value;
-            fetch('/send', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({sender: 'Piyush', message: msg})}).then(() => location.reload());
+        function getRandom() {
+            let name = document.getElementById('name').value;
+            if(!name) { alert("नाव टाका!"); return; }
+            
+            let actions = [
+                "रोस्ट: तू आरशात बघितला की आरसा पण विचार करतो, 'हे काय बघायला लागलो मी!'",
+                "रोस्ट: तू कॉमेडी शोमध्ये जाण्याची गरज नाही, तुझा चेहराच पुरेसा आहे!",
+                "डेअर: पुढील १० मिनिटे कोणाशीही बोलू नकोस, करून दाखव!",
+                "डेअर: तुझ्या क्रशला 'आय लव्ह यू' चा मेसेज कर आणि स्क्रीनशॉट पाठव!",
+                "डेअर: एक गाणे गाऊन त्याचा व्हिडिओ स्टोरीला ठेव!",
+                "रोस्ट: तुझ्याकडे बघून असं वाटतं की देवाने तुला बनवताना ओव्हरटाइम केला होता!"
+            ];
+            
+            let randomAction = actions[Math.floor(Math.random() * actions.length)];
+            document.getElementById('result').innerText = name + ", " + randomAction;
         }
-        function call() { alert("कॉल लावला जात आहे... (येथे व्हिडिओ कॉल लिंक जोडा)"); }
-        setInterval(() => {
-            fetch('/get').then(res => res.json()).then(data => {
-                document.getElementById('chat-box').innerHTML = data.messages.map(m => `<p>${m.sender}: ${m.message}</p>`).join('');
-            });
-        }, 1000);
     </script>
 </body>
 </html>
 """
 
-messages = []
-
 @app.route('/')
 def home():
     return render_template_string(HTML_PAGE)
 
-@app.route('/send', methods=['POST'])
-def send():
-    messages.append(request.json)
-    return jsonify({"status": "success"})
-
-@app.route('/get')
-def get():
-    return jsonify({"messages": messages})
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+    app.run(host='0.0.0.0', port=8080)
