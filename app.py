@@ -6,40 +6,64 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Roast & Dare Hub</title>
+    <title>Ultimate Fun Zone</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: 'Arial', sans-serif; padding: 30px; }
-        .container { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 2px solid #ff4d4d; display: inline-block; width: 90%; max-width: 400px; }
-        input { padding: 10px; width: 80%; border-radius: 5px; border: none; margin-bottom: 10px; }
-        button { padding: 12px 20px; background: #ff4d4d; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        #result { margin-top: 20px; font-size: 1.2em; color: #ffeb3b; padding: 10px; min-height: 50px; }
+        body { background: #0a0a0a; color: #fff; text-align: center; font-family: 'Arial', sans-serif; padding: 20px; }
+        .box { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 2px solid #ff0055; display: inline-block; width: 90%; max-width: 400px; box-shadow: 0 0 20px #ff0055; }
+        input { padding: 12px; width: 85%; border-radius: 10px; border: none; margin-bottom: 20px; background: #333; color: white; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        button:hover { transform: scale(1.05); }
+        .roast { background: #ff0055; }
+        .love { background: #00d4ff; }
+        .task { background: #70ff00; color: #000; }
+        #result { margin-top: 25px; font-size: 1.2em; min-height: 80px; color: #ffeb3b; padding: 15px; border-top: 1px solid #444; }
     </style>
 </head>
 <body>
-    <h1>💀 Roast & Dare 💀</h1>
-    <div class="container">
+    <h1>🔥 Fun Zone 🔥</h1>
+    <div class="box">
         <input type="text" id="name" placeholder="तुमचं नाव टाका...">
-        <br>
-        <button onclick="getRandom()">सांगा माझं काय होईल?</button>
-        <div id="result"></div>
+        <div class="btn-group">
+            <button class="roast" onclick="show('roast')">Roast Me! 💀</button>
+            <button class="love" onclick="show('love')">Love Quote ❤️</button>
+            <button class="task" onclick="show('task')">Give Me Task 🎯</button>
+        </div>
+        <div id="result">येथे रिझल्ट दिसेल...</div>
     </div>
 
     <script>
-        function getRandom() {
-            let name = document.getElementById('name').value;
-            if(!name) { alert("नाव टाका!"); return; }
-            
-            let actions = [
-                "रोस्ट: तू आरशात बघितला की आरसा पण विचार करतो, 'हे काय बघायला लागलो मी!'",
-                "रोस्ट: तू कॉमेडी शोमध्ये जाण्याची गरज नाही, तुझा चेहराच पुरेसा आहे!",
-                "डेअर: पुढील १० मिनिटे कोणाशीही बोलू नकोस, करून दाखव!",
-                "डेअर: तुझ्या क्रशला 'आय लव्ह यू' चा मेसेज कर आणि स्क्रीनशॉट पाठव!",
-                "डेअर: एक गाणे गाऊन त्याचा व्हिडिओ स्टोरीला ठेव!",
-                "रोस्ट: तुझ्याकडे बघून असं वाटतं की देवाने तुला बनवताना ओव्हरटाइम केला होता!"
-            ];
-            
-            let randomAction = actions[Math.floor(Math.random() * actions.length)];
-            document.getElementById('result').innerText = name + ", " + randomAction;
+        function show(type) {
+            let name = document.getElementById('name').value || "दोस्ता";
+            let data = {
+                roast: [
+                    "तुला बघून वाटतं निसर्गाने काहीतरी भलतंच बनवलंय!", 
+                    "तू आरशात बघितला की आरसा पण घाबरून फुटून जातो!",
+                    "तुझं डोकं आणि रिकामी जागा यात जास्त फरक नाहीये.",
+                    "तू कॉमेडी शोमध्ये जाण्याची गरज नाही, तुझा चेहराच पुरेसा आहे!",
+                    "देवाने तुला बनवताना ओव्हरटाइम केला होता आणि शेवटी कंटाळून सोडून दिलं!",
+                    "तुझ्यापेक्षा चांगला मेंदू तर एका वाळलेल्या कांद्याला असेल!"
+                ],
+                love: [
+                    "प्रेम म्हणजे एका दुखाचा सुखावणारा अनुभव आहे!", 
+                    "तू कितीही रागवलास तरी तुझं मन सोन्यासारखं आहे!",
+                    "तुला बघितलं की चेहऱ्यावर आपोआप हसू येतं!",
+                    "आयुष्यात तू आहेस म्हणून सगळं काही सुंदर वाटतं.",
+                    "तुझा स्वभाव एखाद्या सुंदर गाण्यासारखा आहे, जे कधीच संपू नये!",
+                    "तू जगातील सर्वात स्पेशल व्यक्ती आहेस, हे लक्षात ठेव!"
+                ],
+                task: [
+                    "पुढच्या ५ मिनिटात एक सेल्फी काढून स्टेटस ठेव!", 
+                    "कोणाला तरी कॉल करून 'आय मिस यू' म्हण!",
+                    "एखादं फनी गाणं गाऊन व्हिडिओ बनवून टाक!",
+                    "पुढचे १० मिनिटे कोणाशीही न बोलता शांत बसून दाखव!",
+                    "तुझ्या क्रशचा फोटो बघून ३ वेळा 'आय लव्ह यू' म्हण!",
+                    "एका कागदावर 'मी बेस्ट आहे' असं लिहून आरशासमोर धर!"
+                ]
+            };
+            let arr = data[type];
+            let res = arr[Math.floor(Math.random() * arr.length)];
+            document.getElementById('result').innerText = name + ", " + res;
         }
     </script>
 </body>
