@@ -10,7 +10,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 def get_ai_response(user_input):
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(user_input)
         return response.text
     except Exception as e:
