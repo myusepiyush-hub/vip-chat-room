@@ -1,20 +1,7 @@
 import os
-from flask import Flask, render_template_string, request, jsonify
-import google.generativeai as genai
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
-
-# API Key Configuration
-GEMINI_API_KEY = "AIzaSyAXfClB-RcCLe10En88-gg4xt6XIarh9mc"
-genai.configure(api_key=GEMINI_API_KEY)
-
-def get_ai_response(user_input):
-    try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(user_input)
-        return response.text
-    except Exception as e:
-        return f"Error: {str(e)}"
 
 @app.route('/', methods=['GET'])
 def index():
@@ -22,193 +9,128 @@ def index():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Piyush AI Chatroom</title>
+    <title>Piyush VIP Surprise</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0b141a;
-            color: #e9edef;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c20 0%, #06040a 100%);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden;
         }
-        .chat-container {
-            width: 100%;
-            max-width: 500px;
-            height: 100vh;
-            background: #111b21;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        @media (min-width: 501px) {
-            .chat-container { height: 90vh; border-radius: 15px; overflow: hidden; }
-        }
-        .chat-header {
-            background: #202c33;
-            padding: 16px;
+        .container {
             text-align: center;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .glitch-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        .subtitle {
+            color: #8a85a0;
+            font-size: 1rem;
+            margin-bottom: 40px;
+        }
+        .surprise-btn {
+            background: transparent;
+            border: 2px solid #ff007f;
+            color: #ff007f;
+            padding: 15px 40px;
             font-size: 1.2rem;
             font-weight: bold;
-            color: #00a884;
-            border-bottom: 1px solid #2a3942;
-        }
-        .chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-image: radial-gradient(circle, #0b141a 10%, transparent 11%);
-            background-size: 12px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .user-message {
-            background-color: #005c4b;
-            color: #e9edef;
-            align-self: flex-end;
-            border-top-right-radius: 0;
-        }
-        .ai-message {
-            background-color: #202c33;
-            color: #e9edef;
-            align-self: flex-start;
-            border-top-left-radius: 0;
-        }
-        .typing {
-            color: #8696a0;
-            font-style: italic;
-            font-size: 0.85rem;
-            align-self: flex-start;
-        }
-        .input-area {
-            background: #202c33;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .input-area input {
-            flex: 1;
-            background: #2a3942;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 24px;
-            color: #e9edef;
-            font-size: 1rem;
-            outline: none;
-        }
-        .input-area input::placeholder { color: #8696a0; }
-        .input-area button {
-            background: #00a884;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            color: #111b21;
-            font-size: 1.2rem;
+            text-transform: uppercase;
+            border-radius: 50px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+            transition: all 0.4s ease;
+        }
+        .surprise-btn:hover {
+            background: #ff007f;
+            color: #fff;
+            box-shadow: 0 0 25px #ff007f, 0 0 50px #ff007f;
+            transform: scale(1.05);
+        }
+        .box-content {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideUp 0.6s ease forwards;
+        }
+        .box-content h2 {
+            color: #00ffcc;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .box-content p {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .emoji-rain {
+            font-size: 3rem;
+            margin-top: 15px;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px #00ffcc; }
+            50% { transform: scale(1.02); text-shadow: 0 0 20px #00ffcc, 0 0 30px #00ffcc; }
+            100% { transform: scale(1); text-shadow: 0 0 10px #00ffcc; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="chat-header">
-        Piyush AI Chatroom
-    </div>
-    <div class="chat-box" id="chatBox">
-        <div class="message ai-message">Hello! Ask me anything...</div>
-    </div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
-        <button id="sendBtn">➔</button>
+<div class="container">
+    <div class="glitch-title">PIYUSH VIP</div>
+    <div class="subtitle">काहीतरी वेगळं आणि कडक शोधणाऱ्यांसाठी...</div>
+    
+    <button class="surprise-btn" id="clickBtn">इथे क्लिक कर भावा</button>
+    
+    <div class="box-content" id="surpriseBox">
+        <h2>🔥 विषयच एंड भावा! 🔥</h2>
+        <p>जेव्हा आपल्याला माहित नसतं की नक्की काय करायचंय, तेव्हाच काहीतरी इतिहास रचणारं बनतं! तुझी ही पूर्ण वेबसाईट आता विना-एरर आणि सुपरफास्ट झाली आहे.</p>
+        <div class="emoji-rain">😎🚀👑</div>
     </div>
 </div>
 
 <script>
-    const chatBox = document.getElementById('chatBox');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-
-    userInput.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
+    document.getElementById('clickBtn').addEventListener('click', function() {
+        const box = document.getElementById('surpriseBox');
+        this.style.display = 'none'; // बटन लपवून टाका
+        box.style.display = 'block'; // सरप्राईज दाखवा
     });
-
-    sendBtn.addEventListener("click", function() {
-        sendMessage();
-    });
-
-    async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
-
-        appendMessage(text, 'user-message');
-        userInput.value = '';
-
-        const typingId = 'typing-' + Date.now();
-        const typingDiv = document.createElement('div');
-        typingDiv.className = 'message typing';
-        typingDiv.id = typingId;
-        typingDiv.innerText = 'AI is thinking...';
-        chatBox.appendChild(typingDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        try {
-            const response = await fetch('/get_response', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ msg: text })
-            });
-            const data = await response.json();
-            
-            const typingElement = document.getElementById(typingId);
-            if(typingElement) typingElement.remove();
-            
-            appendMessage(data.response, 'ai-message');
-        } catch (error) {
-            const typingElement = document.getElementById(typingId);
-            if(typingElement) typingElement.remove();
-            appendMessage("Error: Could not connect to server.", 'ai-message');
-        }
-    }
-
-    function appendMessage(text, className) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${className}`;
-        messageDiv.innerText = text;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
 </script>
 
 </body>
 </html>
     """)
-
-@app.route('/get_response', methods=['POST'])
-def get_response():
-    data = request.get_json()
-    user_msg = data.get('msg', '')
-    ai_reply = get_ai_response(user_msg)
-    return jsonify({'response': ai_reply})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
