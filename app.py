@@ -5,7 +5,7 @@ import google.generativeai as genai
 app = Flask(__name__)
 
 # API Key Configuration
-GEMINI_API_KEY = "AIzaSyDsPfScvWhfrWonRKT_KlaKFWUj7a_SJ3s"
+GEMINI_API_KEY = "AIzaSyAXfClB-RcCLe10En88-gg4xt6XIarh9mc"
 genai.configure(api_key=GEMINI_API_KEY)
 
 def get_ai_response(user_input):
@@ -130,13 +130,13 @@ def index():
 
 <div class="chat-container">
     <div class="chat-header">
-        🤖 पियुषची स्मार्ट एआय चॅटरूम
+        Piyush AI Chatroom
     </div>
     <div class="chat-box" id="chatBox">
-        <div class="message ai-message">नमस्कार! मी तुमचा एआय मित्र आहे. मला काहीही विचारा...</div>
+        <div class="message ai-message">Hello! Ask me anything...</div>
     </div>
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="एआय ला काहीही विचारा..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
         <button id="sendBtn">➔</button>
     </div>
 </div>
@@ -167,7 +167,7 @@ def index():
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message typing';
         typingDiv.id = typingId;
-        typingDiv.innerText = 'AI विचार करत आहे...';
+        typingDiv.innerText = 'AI is thinking...';
         chatBox.appendChild(typingDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
