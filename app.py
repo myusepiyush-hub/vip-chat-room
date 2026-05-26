@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, jsonify
 import google.generativeai as genai
 
 app = Flask(__name__)
@@ -16,15 +16,8 @@ def get_ai_response(user_input):
     except Exception as e:
         return f"Error: {str(e)}"
 
-@app.route('/', methods=['GET', 'POST'])
-def chat():
-    response = ""
-    user_msg = ""
-    if request.method == 'POST':
-        user_msg = request.form.get('msg')
-        if user_msg:
-            response = get_ai_response(user_msg)
-
+@app.route('/', methods=['GET'])
+def index():
     return render_template_string("""
 <!DOCTYPE html>
 <html>
@@ -50,7 +43,6 @@ def chat():
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: fadeIn 0.5s ease-in-out;
         }
         @media (min-width: 501px) {
             .chat-container { height: 90vh; border-radius: 15px; overflow: hidden; }
@@ -63,10 +55,6 @@ def chat():
             font-weight: bold;
             color: #00a884;
             border-bottom: 1px solid #2a3942;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
         .chat-box {
             flex: 1;
@@ -99,6 +87,12 @@ def chat():
             align-self: flex-start;
             border-top-left-radius: 0;
         }
+        .typing {
+            color: #8696a0;
+            font-style: italic;
+            font-size: 0.85rem;
+            align-self: flex-start;
+        }
         .input-area {
             background: #202c33;
             padding: 10px 15px;
@@ -129,12 +123,6 @@ def chat():
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
-        }
-        .input-area button:hover { background: #00bf96; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -145,27 +133,82 @@ def chat():
         🤖 पियुषची स्मार्ट एआय चॅटरूम
     </div>
     <div class="chat-box" id="chatBox">
-        {% if user_msg %}
-            <div class="message user-message">{{ user_msg }}</div>
-        {% endif %}
-        {% if response %}
-            <div class="message ai-message">{{ response }}</div>
-        {% endif %}
+        <div class="message ai-message">नमस्कार! मी तुमचा एआय मित्र आहे. मला काहीही विचारा...</div>
     </div>
-    <form class="input-area" method="POST" action="/">
-        <input type="text" name="msg" placeholder="एआय ला काहीही विचारा..." required autocomplete="off">
-        <button type="submit">➔</button>
-    </form>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="एआय ला काहीही विचारा..." autocomplete="off">
+        <button id="sendBtn">➔</button>
+    </div>
 </div>
 
 <script>
-    var chatBox = document.getElementById('chatBox');
-    chatBox.scrollTop = chatBox.scrollHeight;
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    userInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    sendBtn.addEventListener("click", function() {
+        sendMessage();
+    });
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user-message');
+        userInput.value = '';
+
+        const typingId = 'typing-' + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message typing';
+        typingDiv.id = typingId;
+        typingDiv.innerText = 'AI विचार करत आहे...';
+        chatBox.appendChild(typingDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch('/get_response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ msg: text })
+            });
+            const data = await response.json();
+            
+            const typingElement = document.getElementById(typingId);
+            if(typingElement) typingElement.remove();
+            
+            appendMessage(data.response, 'ai-message');
+        } catch (error) {
+            const typingElement = document.getElementById(typingId);
+            if(typingElement) typingElement.remove();
+            appendMessage("Error: Could not connect to server.", 'ai-message');
+        }
+    }
+
+    function appendMessage(text, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.innerText = text;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 </script>
 
 </body>
 </html>
     """)
+
+@app.route('/get_response', methods=['POST'])
+def get_response():
+    data = request.get_json()
+    user_msg = data.get('msg', '')
+    ai_reply = get_ai_response(user_msg)
+    return jsonify({'response': ai_reply})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
