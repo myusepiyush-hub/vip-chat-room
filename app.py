@@ -10,168 +10,206 @@ def index():
 <html lang="mr">
 <head>
     <meta charset="UTF-8">
-    <title>🔮 Piyush Mind Reader 🔮</title>
+    <title>🏫 Patil College Connection 🏫</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: linear-gradient(135deg, #1a0933 0%, #0a0314 100%);
+            background: linear-gradient(135deg, #090a0f 0%, #020305 100%);
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 15px;
+            padding: 10px;
+            overflow: hidden;
         }
-        .magic-box {
+        .app-container {
             width: 100%;
             max-width: 450px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid #bd93f9;
-            border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 0 25px rgba(189, 147, 249, 0.3);
-            backdrop-filter: blur(10px);
-        }
-        h1 {
-            color: #50fa7b;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px rgba(80, 250, 123, 0.4);
-        }
-        .steps {
-            text-align: left;
-            background: rgba(0, 0, 0, 0.3);
+            height: 92vh;
+            background: #11141a;
+            border: 2px solid #ff0055;
+            border-radius: 24px;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1rem;
-            line-height: 1.6;
-            border-left: 4px solid #ff79c6;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.25);
+            position: relative;
         }
-        .steps li {
-            margin-bottom: 8px;
-            list-style-type: none;
+        .header {
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .grid-item {
-            font-size: 0.85rem;
-            color: #f8f8f2;
-            padding: 4px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .magic-btn {
-            background: #ff79c6;
-            color: #1a0933;
-            border: none;
-            padding: 14px 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 121, 198, 0.4);
-            transition: all 0.3s ease;
-            width: 100%;
+        .header h1 {
+            color: #ff0055;
+            font-size: 1.4rem;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .magic-btn:hover {
-            background: #ff92df;
-            box-shadow: 0 0 25px rgba(255, 121, 198, 0.7);
-            transform: scale(1.02);
+        .header p {
+            color: #33ff33;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
-        .result-screen {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out forwards;
+        
+        /* व्हिडिओ कॉलिंग एरिया */
+        .video-grid {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
         }
-        .final-symbol {
-            font-size: 5rem;
-            color: #ffb86c;
-            margin: 20px 0;
-            text-shadow: 0 0 20px rgba(255, 184, 108, 0.6);
-            animation: pulse 1.5s infinite;
+        
+        /* समोरच्याचा व्हिडिओ (स्ट्रेंजर) */
+        .remote-video-box {
+            flex: 1.2;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #00f0ff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+        .stranger-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        
+        /* स्वतःचा व्हिडिओ (लोकल कॅमेरा) */
+        .local-video-box {
+            flex: 0.8;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #33ff33;
+            position: relative;
+        }
+        #localVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+        
+        .tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+        .tag-stranger { color: #00f0ff; }
+        .tag-local { color: #33ff33; }
+        
+        /* कंट्रोल बटण */
+        .control-area {
+            padding-top: 5px;
+        }
+        .skip-btn {
+            background: linear-gradient(135deg, #ff0055 0%, #990033 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+        }
+        .skip-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px rgba(255, 0, 85, 0.2);
         }
     </style>
 </head>
 <body>
 
-<div class="magic-box" id="mainBox">
-    <div id="gameScreen">
-        <h1>🔮 पाटील माइंड रीडर 🔮</h1>
-        <p style="color: #8be9fd; font-size: 0.9rem; margin-bottom: 15px;">मी तुझ्या मनातलं १००% अचूक ओळखू शकतो!</p>
-        
-        <div class="steps">
-            <strong>या ४ पायऱ्या पाळ भावा:</strong><br><br>
-            <li>1️⃣ मनात १० ते ९९ च्या दरम्यान कोणताही <b>एक नंबर</b> पकड.</li>
-            <li>2️⃣ आता त्या दोन्ही अंकांची बेरीज कर (उदा. २३ असेल तर २+३ = ५).</li>
-            <li>3️⃣ मूळ नंबरमधून ती बेरीज वजा कर (उदा. २३ - ५ = १८).</li>
-            <li>4️⃣ आता खालील तक्त्यामध्ये तुझ्या आलेल्या उत्तराच्या समोरचा <b>चिन्ह (Symbol)</b> नीट मनात लक्षात ठेव.</li>
-        </div>
-
-        <div class="grid-container" id="symbolGrid"></div>
-
-        <button class="magic-btn" id="readMindBtn">माझं मन वाच!</button>
+<div class="app-container">
+    <div class="header">
+        <h1>PATIL CONNECT</h1>
+        <p>🟢 ऑनलाईन युझर्स: ७,४२०</p>
     </div>
 
-    <div class="result-screen" id="resultScreen">
-        <h1>🔮 तुझ्या मनात हेच होतं! 🔮</h1>
-        <p style="color: #f8f8f2;">मी तुझ्या डोक्यात चाललेलं चिन्ह हुडकून काढलं आहे:</p>
-        <div class="final-symbol" id="targetSymbol">👑</div>
-        <p style="color: #50fa7b; font-weight: bold;">विषयच एंड भावा! आहे का नाही जादू? 😎</p>
-        <button class="magic-btn" style="margin-top: 20px; background: #8be9fd;" onclick="location.reload()">पुन्हा खेळा</button>
+    <div class="video-grid">
+        <!-- समोरचा माणूस -->
+        <div class="remote-video-box">
+            <div class="tag tag-stranger">🔴 STRANGER [COLLEGE]</div>
+            <img id="strangerView" class="stranger-img" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=500&q=80" alt="Stranger">
+        </div>
+        
+        <!-- स्वतःचा फेस -->
+        <div class="local-video-box">
+            <div class="tag tag-local">👦 तुम्ही (YOU)</div>
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+    </div>
+
+    <div class="control-area">
+        <button class="skip-btn" id="skipBtn">NEXT (SKIP) ➔</button>
     </div>
 </div>
 
 <script>
-    // गेम सुरू झाल्यावर प्रत्येक वेळी एक नवीन जादूचा सिम्बॉल निवडला जाईल
-    const symbols = ["👑", "🔥", "🚀", "💀", "💎", "👻", "🃏", "🦁", "⚡", "🦖", "🛸"];
-    const magicSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-    const grid = document.getElementById('symbolGrid');
+    // वेगवेगळ्या ऑनलाईन लोकांचे फोटो (हुबेहूब व्हिडिओ कॉल सुरू असल्यासारखं दिसेल)
+    const strangers = [
+        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=500&q=80",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80",
+        "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=500&q=80",
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80"
+    ];
 
-    // तक्ता तयार करणे (९ च्या पाढ्यातील नंबर्सना मॅजिक सिम्बॉल देणे)
-    for (let i = 1; i <= 99; i++) {
-        let currentSymbol = "";
-        if (i % 9 === 0) {
-            currentSymbol = magicSymbol; // ९ च्या पाढ्यात येणाऱ्या सर्व नंबरला सेम सिम्बॉल मिळतो
-        } else {
-            // बाकीच्या नंबर्सना उरलेले सिम्बॉल्स रँडम मिळतात
-            let remainingSymbols = symbols.filter(s => s !== magicSymbol);
-            currentSymbol = remainingSymbols[Math.floor(Math.random() * remainingSymbols.length)];
+    let currentIdx = 0;
+
+    // स्वतःचा कॅमेरा सुरू करणे
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = stream;
+        } catch (err) {
+            console.error("Camera access denied", err);
         }
-        
-        let item = document.createElement('div');
-        item.className = 'grid-item';
-        item.innerText = `${i} : ${currentSymbol}`;
-        grid.appendChild(item);
     }
 
-    // बटन क्लिक वर रिझल्ट दाखवणे
-    document.getElementById('readMindBtn').addEventListener('click', function() {
-        document.getElementById('gameScreen').style.display = 'none';
-        document.getElementById('targetSymbol').innerText = magicSymbol;
-        document.getElementById('resultScreen').style.display = 'block';
+    // SKIP बटण दाबल्यावर लगेच पुढचा माणूस आणणे
+    document.getElementById('skipBtn').addEventListener('click', function() {
+        const strangerImg = document.getElementById('strangerView');
+        
+        // एक छोटा 'Connecting' लुक देण्यासाठी तात्पुरतं ब्लॅक करणे
+        strangerImg.style.opacity = "0.3";
+        this.innerText = "SEARCHING...";
+        
+        setTimeout(() => {
+            // पुढचा रँडम व्यक्ती निवडणे
+            let nextIdx = Math.floor(Math.random() * strangers.length);
+            while(nextIdx === currentIdx) { 
+                nextIdx = Math.floor(Math.random() * strangers.length);
+            }
+            currentIdx = nextIdx;
+            
+            strangerImg.src = strangers[currentIdx];
+            strangerImg.style.opacity = "1";
+            this.innerText = "NEXT (SKIP) ➔";
+        }, 400); // अवघ्या ०.४ सेकंदात कॉल कनेक्ट होईल
     });
+
+    window.onload = initCamera;
 </script>
 
 </body>
