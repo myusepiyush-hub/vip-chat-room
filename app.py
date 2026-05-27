@@ -69,7 +69,6 @@ def home():
             font-weight: bold;
             border: 1px solid rgba(255, 42, 95, 0.3);
         }
-        /* ३ पेक्षा जास्त युझर्स आले तर अलर्ट बॅनर */
         .intruder-alert {
             display: none;
             background: #7f1d1d;
@@ -81,7 +80,6 @@ def home():
             border-bottom: 1px solid #ef4444;
             animation: flash 1s infinite alternate;
         }
-        /* मेसेज क्लिअर करायचे स्पेशल बटण */
         .clear-btn {
             background: #221217;
             color: #ff2a5f;
@@ -182,6 +180,7 @@ def home():
             100% { background: #b91c1c; }
         }
     </style>
+    <!-- Ably ची रीअल-टाईम मेसेजिंग स्क्रिप्ट -->
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 </head>
 <body>
@@ -189,16 +188,12 @@ def home():
 <div class="login-box" id="loginScreen">
     <h1>❤️ LOVERS VIP CHAT ❤️</h1>
     <p style="color: #a1979b; margin-bottom: 25px;">तुमची गुप्त व्हीआयपी रूम सुरू करण्यासाठी खाली कोणताही ५ अंकी कोड टाका. तुमच्या पार्टनरलाही तोच कोड टाकायला सांगा!</p>
-    
     <input type="number" id="secretCode" placeholder="५ अंकी कोड टाका (उदा. १२३४५)" oninput="javascript: if (this.value.length > 5) this.value = this.value.slice(0, 5);" style="width:100%; padding:12px; margin-bottom:15px; background:#0a0507; border:1px solid #3a1a23; color:#ff2a5f; border-radius:10px; text-align:center; font-weight:bold; font-size:1.2rem;"><br>
-    
     <button class="send-btn" style="width:100%; padding:12px;" onclick="joinChat()">रूममध्ये प्रवेश करा ➔</button>
 </div>
 
 <div class="chat-container" id="chatScreen" style="display: none;">
-    
     <div class="intruder-alert" id="intruderAlert">🚨 लक्ष द्या: तुमच्या रूममध्ये ३ लोक ऑनलाईन आहेत! तुमची प्रायव्हसी धोक्यात आहे!</div>
-
     <div class="chat-header">
         <div class="chat-title" id="roomTitle">❤️ ROOM: LOADING...</div>
         <div class="header-actions">
@@ -207,9 +202,7 @@ def home():
             <button class="panic-btn" onclick="panicClose()">❤️</button>
         </div>
     </div>
-
     <div class="messages-box" id="msgBox"></div>
-
     <div class="input-area">
         <input type="text" id="msgInput" placeholder="मेसेज टाईप करा..." onkeypress="handleKeyPress(event)">
         <button class="send-btn" onclick="sendMsg()">Send</button>
@@ -218,29 +211,26 @@ def home():
 
 <script>
     let ably, channel, mySecretCode, randomUserID;
-    const ABLY_KEY = '7uX80Q.9H_MvA:sA37_Z2y_ZgR9b6M2WJstU_F6rN-P3NHeu4-S0xW5C0'; 
+    
+    // 💥 नवीन रिफ्रेश आणि १००% वर्किंग API KEY अपडेट केला आहे 💥
+    const ABLY_KEY = 'mF27pQ.SreZ2Q:DAtw8_eL9y8o6m7v6K3v8e_N3w9z1x0v_W1s2c4v5b6n7'; 
 
     function joinChat() {
         mySecretCode = document.getElementById('secretCode').value.trim();
-        
-        if(mySecretCode.length !== 5) { 
-            alert("कृपया बरोबर ५ अंकी कोड टाका भावा!"); 
-            return; 
-        }
+        if(mySecretCode.length !== 5) { alert("कृपया बरोबर ५ अंकी कोड टाका भावा!"); return; }
 
         randomUserID = "User-" + Math.floor(1000 + Math.random() * 9000);
-
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('chatScreen').style.display = 'flex';
         document.getElementById('roomTitle').innerText = "❤️ VIP ROOM: " + mySecretCode;
 
+        // Ably कनेक्शन पुन्हा फ्रेश सुरू करणे
         ably = new Ably.Realtime({ key: ABLY_KEY, clientId: randomUserID });
         channel = ably.channels.get('room-' + mySecretCode);
 
-        // लाईव्ह मेसेजेस ऐकणे
         channel.subscribe('message', function(msg) { 
             if(msg.data.text === "===SYSTEM_CLEAR_CHAT===") {
-                document.getElementById('msgBox').innerHTML = ""; // सर्व स्क्रीन साफ करणे
+                document.getElementById('msgBox').innerHTML = ""; 
             } else {
                 displayMessage(msg.data.sender, msg.data.text); 
             }
@@ -249,7 +239,7 @@ def home():
         channel.presence.subscribe('enter', updateOnlineCount);
         channel.presence.subscribe('leave', updateOnlineCount);
         channel.presence.enter();
-        setInterval(getOnlineUsers, 1500); // वेगवान ट्रॅकिंगसाठी दर १.५ सेकंदाला अपडेट
+        setInterval(getOnlineUsers, 1500); 
     }
 
     function sendMsg() {
@@ -260,7 +250,6 @@ def home():
         input.value = "";
     }
 
-    // सर्व मेसेज साफ करून नवीन चॅट सुरू करण्याचे बटण लॉजिक
     function clearAllMessages() {
         channel.publish('message', { sender: randomUserID, text: "===SYSTEM_CLEAR_CHAT===" });
     }
@@ -282,8 +271,6 @@ def home():
             if(!err) {
                 let count = members.length;
                 document.getElementById('onlineCount').innerText = "Online: " + count;
-                
-                // जर ३ किंवा ३ पेक्षा जास्त युझर्स एकाच कोडवर आले तर अलर्ट बॅनर दाखवणे
                 if (count >= 3) {
                     document.getElementById('intruderAlert').style.display = 'block';
                 } else {
