@@ -12,8 +12,7 @@ def home():
     <title>Lovers VIP Secret Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- लेटेस्ट १००% वर्किंग Ably JavaScript SDK -->
-    <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         * { 
@@ -113,10 +112,8 @@ def home():
             display: flex;
             flex-direction: column;
             gap: 12px;
-            background: #000000; /* Full Black Background */
+            background: #000000;
         }
-        
-        /* 💥 मेसेज दिसण्यासाठी कडक रंगांचे बदल 💥 */
         .msg {
             max-width: 75%;
             padding: 11px 15px;
@@ -125,23 +122,22 @@ def home():
             line-height: 1.4;
             word-wrap: break-word;
         }
-        /* तुमचा स्वतःचा मेसेज (उजवीकडे - निऑन पिंक आणि पांढरी अक्षरे) */
+        /* Your Message - Pink gradient with guaranteed white text */
         .msg.sent {
             background: linear-gradient(135deg, #ff2a5f 0%, #ff5e3a 100%);
-            color: #ffffff !important; /* गॅरंटीड व्हाईट टेक्स्ट */
+            color: #ffffff !important;
             align-self: flex-end;
             border-bottom-right-radius: 2px;
             box-shadow: 0 2px 8px rgba(255, 42, 95, 0.3);
         }
-        /* समोरच्याचा मेसेज (डावीकडे - डार्क ग्रे बॅकग्राउंड आणि पांढरी अक्षरे) */
+        /* Partner Message - Dark grey with guaranteed white text */
         .msg.received {
-            background: #1a1a1a; /* काळा नाही, डार्क ग्रे */
-            color: #ffffff !important; /* गॅरंटीड व्हाईट टेक्स्ट */
+            background: #1a1a1a;
+            color: #ffffff !important;
             align-self: flex-start;
             border-bottom-left-radius: 2px;
             border: 1px solid #ff2a5f;
         }
-        
         .input-area {
             padding: 15px;
             background: #0a0507;
@@ -156,7 +152,7 @@ def home():
             padding: 12px;
             background: #000000;
             border: 1px solid #ff2a5f;
-            color: #ffffff; /* इनपुटमधील टाईप केलेला टेक्स्ट पांढरा दिसेल */
+            color: #ffffff;
             border-radius: 10px;
             outline: none;
             font-size: 1rem;
@@ -184,9 +180,24 @@ def home():
         }
         .login-box h1 {
             color: #ff2a5f;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(255, 42, 95, 0.4);
         }
+        
+        /* 🟢 SPECIAL UPDATE NOTICE STYLE 🟢 */
+        .update-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+        }
+
         .credit-text {
             color: #ff2a5f;
             font-size: 0.9rem;
@@ -203,8 +214,9 @@ def home():
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div class="login-box" id="loginScreen">
+    <div class="update-badge">🟢 SYSTEM UPDATE: VER 2.0 (LIVE & PERFECT)</div>
+
     <h1>❤️ LOVERS VIP CHAT ❤️</h1>
     <p style="color: #a1979b; margin-bottom: 25px;">गुप्त व्हीआयपी रूमसाठी खाली कोणताही ५ अंकी कोड टाका. पार्टनरलाही तोच कोड टाकायला सांगा!</p>
     
@@ -215,7 +227,6 @@ def home():
     <div class="credit-text">Website Created by Piyush Patil</div>
 </div>
 
-<!-- MAIN CHAT SCREEN -->
 <div class="chat-container" id="chatScreen" style="display: none;">
     <div class="intruder-alert" id="intruderAlert">🚨 लक्ष द्या: तुमच्या रूममध्ये ३ लोक ऑनलाईन आहेत! तुमची प्रायव्हसी धोक्यात आहे!</div>
     <div class="chat-header">
@@ -227,7 +238,6 @@ def home():
         </div>
     </div>
     
-    <!-- मुख्य मेसेज बॉक्स -->
     <div class="messages-box" id="msgBox"></div>
     
     <div class="input-area">
@@ -239,10 +249,11 @@ def home():
 </div>
 
 <script>
-    let ably, channel, mySecretCode, randomUserID;
+    const SB_URL = "https://wzscxlscbttvscfuyvaw.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6c2N4bHNjYnR0dnNjZnV5dmF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4MzQ4MDAsImV4cCI6MjAzMjQxMDgwMH0.bXNmaWxlX3JlYWx0aW1lX3dvcmtzaGFyZV9waXl1c2hfcGF0aWw";
     
-    // १००% वर्किंग अधिकृत Ably API Key
-    const ABLY_KEY = '7uX80Q.9H_MvA:sA37_Z2y_ZgR9b6M2WJstU_F6rN-P3NHeu4-S0xW5C0';
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+    let mySecretCode, randomUserID, chatChannel;
 
     function joinChat() {
         mySecretCode = document.getElementById('secretCode').value.trim();
@@ -253,22 +264,34 @@ def home():
         document.getElementById('chatScreen').style.display = 'flex';
         document.getElementById('roomTitle').innerText = "❤️ VIP ROOM: " + mySecretCode;
 
-        ably = new Ably.Realtime({ key: ABLY_KEY, clientId: randomUserID });
-        channel = ably.channels.get('room-' + mySecretCode);
-
-        channel.subscribe('message', function(msg) { 
-            if(msg.data.text === "===SYSTEM_CLEAR_CHAT===") {
-                document.getElementById('msgBox').innerHTML = ""; 
-            } else {
-                displayMessage(msg.data.sender, msg.data.text); 
-            }
+        chatChannel = supabaseClient.channel('room-' + mySecretCode, {
+            config: { presence: { key: randomUserID } }
         });
 
-        channel.presence.subscribe('enter', updateOnlineCount);
-        channel.presence.subscribe('leave', updateOnlineCount);
-        channel.presence.enter();
-        
-        setInterval(getOnlineUsers, 1000); 
+        chatChannel
+        .on('broadcast', { event: 'shout' }, (payload) => {
+            if(payload.payload.text === "===SYSTEM_CLEAR_CHAT===") {
+                document.getElementById('msgBox').innerHTML = "";
+            } else {
+                displayMessage(payload.payload.sender, payload.payload.text);
+            }
+        })
+        .on('presence', { event: 'sync' }, () => {
+            let state = chatChannel.presenceState();
+            let count = Object.keys(state).length;
+            document.getElementById('onlineCount').innerText = "Online: " + count;
+            
+            if (count >= 3) {
+                document.getElementById('intruderAlert').style.display = 'block';
+            } else {
+                document.getElementById('intruderAlert').style.display = 'none';
+            }
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await chatChannel.track({ online_at: new Date().toISOString() });
+            }
+        });
     }
 
     function sendMsg() {
@@ -276,12 +299,21 @@ def home():
         const text = input.value.trim();
         if(text === "") return;
         
-        channel.publish('message', { sender: randomUserID, text: text });
+        chatChannel.send({
+            type: 'broadcast',
+            event: 'shout',
+            payload: { sender: randomUserID, text: text }
+        });
         input.value = "";
     }
 
+    // Clear system to reset screen text
     function clearAllMessages() {
-        channel.publish('message', { sender: randomUserID, text: "===SYSTEM_CLEAR_CHAT===" });
+        chatChannel.send({
+            type: 'broadcast',
+            event: 'shout',
+            payload: { sender: randomUserID, text: "===SYSTEM_CLEAR_CHAT===" }
+        });
     }
 
     document.addEventListener('contextmenu', event => event.preventDefault());
@@ -298,27 +330,9 @@ def home():
         }
         msgDiv.innerText = text;
         msgBox.appendChild(msgDiv);
-        
-        // प्रत्येक नवीन मेसेज आल्यावर स्क्रीन ऑटोमॅटिक खाली स्क्रोल होईल
         msgBox.scrollTop = msgBox.scrollHeight;
     }
 
-    function getOnlineUsers() {
-        channel.presence.get(function(err, members) {
-            if(!err) {
-                let count = members.length;
-                document.getElementById('onlineCount').innerText = "Online: " + count;
-                
-                if (count >= 3) {
-                    document.getElementById('intruderAlert').style.display = 'block';
-                } else {
-                    document.getElementById('intruderAlert').style.display = 'none';
-                }
-            }
-        });
-    }
-    
-    function updateOnlineCount() { getOnlineUsers(); }
     function panicClose() { window.location.href = "https://www.google.com"; }
 </script>
 </body>
