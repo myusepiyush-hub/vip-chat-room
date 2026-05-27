@@ -2,7 +2,7 @@
 <html lang="mr">
 <head>
     <meta charset="UTF-8">
-    <title>❤️ लव्हर्स व्हीआयपी सिक्रेट चॅट ❤️</title>
+    <title> लव्हर्स व्हीआयपी सिक्रेट चॅट </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* टेक्स्ट कॉपी आणि सिलेक्शन ब्लॉक करणे */
@@ -165,7 +165,7 @@
 
 <!-- लॉगिन स्क्रीन -->
 <div class="login-box" id="loginScreen">
-    <h1>❤️ LOVERS PRIVATE CHAT ❤️</h1>
+    <h1> LOVERS PRIVATE CHAT </h1>
     <p style="color: #a1979b; margin-bottom: 25px; font-size: 0.95rem;">फक्त तुमच्या दोघांसाठी अत्यंत सुरक्षित जागा. पेज रिफ्रेश होताच सर्व गप्पा कायमच्या नष्ट होतील. मेसेज कॉपी करणे ब्लॉक आहे!</p>
     <input type="text" id="username" placeholder="तुमचे नाव टाका..." style="width:100%; padding:12px; margin-bottom:15px; background:#0a0507; border:1px solid #3a1a23; color:#fff; border-radius:10px; text-align:center; -webkit-user-select: text; user-select: text;"><br>
     <input type="text" id="roomID" value="lovers-secret-room" style="display:none;"><br>
@@ -175,11 +175,11 @@
 <!-- मुख्य चॅट रूम -->
 <div class="chat-container" id="chatScreen" style="display: none;">
     <div class="chat-header">
-        <div class="chat-title">❤️ LOVERS ROOM</div>
+        <div class="chat-title"> LOVERS ROOM</div>
         <div style="display: flex; align-items: center; gap: 10px;">
             <div class="online-status" id="onlineCount">Online: 1</div>
             <!-- पॅनिक बटण: क्लिक करताच गुगलवर जाईल -->
-            <button class="panic-btn" onclick="panicClose()" title="झटपट बंद करा">❤️</button>
+            <button class="panic-btn" onclick="panicClose()" title="झटपट बंद करा"></button>
         </div>
     </div>
 
