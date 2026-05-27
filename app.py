@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# रूम वाईज मेसेजेस साठवण्यासाठी डिक्शनरी (मेमरी)
-room_messages = {}
+# Room wise data tracking sathi dict
+room_data = {}
 
 @app.route('/')
 def home():
@@ -15,6 +15,13 @@ def home():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Lovers VIP Chat</title>
         <style>
+            /* Default Variables (Neon Pink Theme) */
+            :root {
+                --main-color: #ff2a75;
+                --gradient-color: linear-gradient(135deg, #ff2a75, #ff5e62);
+                --bg-box: #050505;
+            }
+
             body {
                 background-color: #000;
                 color: #fff;
@@ -25,9 +32,10 @@ def home():
                 justify-content: center;
                 height: 100vh;
                 box-sizing: border-box;
+                transition: all 0.3s ease;
             }
             
-            /* 🔐 रूम सिलेक्ट करण्याची स्क्रीन (सुरुवातीला दिसेल) */
+            /* 🔐 Room Selection Screen */
             #room-selection-screen {
                 width: 100%;
                 max-width: 450px;
@@ -38,7 +46,7 @@ def home():
                 height: 90vh;
             }
             .room-box {
-                border: 2px solid #ff2a75;
+                border: 2px solid var(--main-color);
                 padding: 30px 20px;
                 border-radius: 25px;
                 text-align: center;
@@ -46,22 +54,21 @@ def home():
                 background-color: #050505;
                 width: 85%;
             }
-            .room-box h2 { color: #ff2a75; margin-bottom: 20px; font-size: 24px; }
+            .room-box h2 { color: var(--main-color); margin-bottom: 20px; font-size: 24px; }
             .room-input {
                 width: 85%;
                 padding: 12px;
-                font-size: 18px;
+                font-size: 16px;
                 text-align: center;
                 background: #000;
-                border: 1px solid #ff2a75;
+                border: 1px solid var(--main-color);
                 color: #fff;
                 border-radius: 15px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
                 outline: none;
-                letter-spacing: 2px;
             }
             .room-btn {
-                background: linear-gradient(135deg, #ff2a75, #ff5e62);
+                background: var(--gradient-color);
                 border: none;
                 color: white;
                 padding: 12px 30px;
@@ -72,21 +79,22 @@ def home():
                 width: 90%;
             }
 
-            /* 💬 मुख्य चॅट स्क्रीन (ओरिजिनल डेंजर लुक - सुरवातीला लपवलेली असेल) */
+            /* 💬 Main Chat Screen */
             #chat-main-screen {
                 display: none;
                 width: 100%;
                 max-width: 450px;
-                border: 2px solid #ff2a75;
+                border: 2px solid var(--main-color);
                 border-radius: 25px;
                 padding: 15px;
                 flex-direction: column;
                 background-color: #000;
                 box-shadow: 0 0 20px rgba(255, 42, 117, 0.4);
                 height: 95vh;
+                position: relative;
             }
             
-            /* वरची पट्टी */
+            /* Header */
             .header {
                 display: flex;
                 justify-content: space-between;
@@ -94,32 +102,32 @@ def home():
                 margin-bottom: 15px;
             }
             .room-title {
-                color: #ff2a75;
-                font-size: 18px;
+                color: var(--main-color);
+                font-size: 16px;
                 font-weight: bold;
                 margin: 0;
                 line-height: 1.2;
             }
             .header-buttons {
                 display: flex;
-                gap: 8px;
+                gap: 5px;
                 align-items: center;
             }
             .clear-btn {
-                background-color: #ff2a75;
+                background-color: var(--main-color);
                 border: none;
                 color: white;
-                padding: 6px 14px;
+                padding: 6px 12px;
                 border-radius: 15px;
                 font-weight: bold;
                 cursor: pointer;
-                font-size: 14px;
+                font-size: 12px;
             }
             .online-box {
-                border: 1px solid #ff2a75;
+                border: 1px solid var(--main-color);
                 border-radius: 15px;
-                padding: 5px 12px;
-                font-size: 12px;
+                padding: 4px 10px;
+                font-size: 11px;
                 text-align: center;
                 line-height: 1.2;
             }
@@ -131,14 +139,25 @@ def home():
                 border-radius: 15px;
                 font-weight: bold;
                 cursor: pointer;
-                font-size: 14px;
-                box-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+                font-size: 12px;
             }
             
-            /* चॅट बॉक्स डिझाईन */
+            /* 🎨 Theme Picker Styling */
+            .theme-select {
+                background: #111;
+                color: #fff;
+                border: 1px solid var(--main-color);
+                padding: 5px;
+                font-size: 11px;
+                border-radius: 10px;
+                outline: none;
+                cursor: pointer;
+            }
+            
+            /* Chat Box & Watermark */
             #chat-box {
                 flex: 1;
-                border: 1px solid #ff2a75;
+                border: 1px solid var(--main-color);
                 border-radius: 15px;
                 padding: 15px;
                 overflow-y: auto;
@@ -146,8 +165,25 @@ def home():
                 flex-direction: column;
                 gap: 12px;
                 margin-bottom: 15px;
-                background-color: #050505;
+                background-color: var(--bg-box);
+                position: relative;
             }
+            
+            /* 🔐 Encrypted Background Tag */
+            .encrypt-tag {
+                text-align: center;
+                color: #444;
+                font-size: 11px;
+                font-style: italic;
+                margin: 5px auto;
+                background: #090909;
+                padding: 5px 12px;
+                border-radius: 20px;
+                border: 1px dashed #333;
+                width: fit-content;
+                pointer-events: none;
+            }
+            
             .msg {
                 padding: 12px 18px;
                 border-radius: 18px;
@@ -155,20 +191,28 @@ def home():
                 font-size: 16px;
                 word-wrap: break-word;
                 line-height: 1.4;
+                z-index: 2;
             }
             .opp-msg {
                 background-color: #1a1a1a;
                 color: #fff;
                 align-self: flex-start;
-                border: 1px solid #ff2a75;
+                border: 1px solid var(--main-color);
             }
             .my-msg {
-                background: linear-gradient(135deg, #ff2a75, #ff5e62);
+                background: var(--gradient-color);
                 color: #fff;
                 align-self: flex-end;
             }
+            .msg-user {
+                font-size: 11px;
+                color: var(--main-color);
+                margin-bottom: 4px;
+                display: block;
+                font-weight: bold;
+            }
             
-            /* इनपुट पट्टी */
+            /* Input container */
             .input-container {
                 display: flex;
                 gap: 10px;
@@ -180,13 +224,13 @@ def home():
                 padding: 12px 15px;
                 background-color: #090909;
                 color: #fff;
-                border: 1px solid #ff2a75;
+                border: 1px solid var(--main-color);
                 border-radius: 15px;
                 font-size: 16px;
                 outline: none;
             }
             .send-btn {
-                background-color: #ff2a75;
+                background-color: var(--main-color);
                 border: none;
                 color: white;
                 padding: 12px 22px;
@@ -197,13 +241,13 @@ def home():
             }
             .footer-text {
                 text-align: center;
-                color: #ff2a75;
+                color: var(--main-color);
                 font-size: 12px;
                 margin-top: 5px;
                 font-weight: bold;
             }
             
-            /* 📹 व्हिडिओ कॉल स्क्रीन विंडो */
+            /* Video window */
             #video-container {
                 display: none;
                 position: fixed;
@@ -220,8 +264,8 @@ def home():
         <div id="room-selection-screen">
             <div class="room-box">
                 <h2>❤️ LOVERS VIP CHAT</h2>
-                <p style="color: #aaa; font-size: 14px;">तुमचा कोणताही सिक्रेट ५ अंकी रूम नंबर टाका:</p>
-                <input type="text" id="roomNumberInput" class="room-input" maxlength="5" placeholder="उदा. 50501">
+                <input type="text" id="usernameInput" class="room-input" placeholder="तुमचे नाव टाका (उदा. Piyush)">
+                <input type="text" id="roomNumberInput" class="room-input" maxlength="5" placeholder="५ अंकी रूम नंबर (उदा. 50501)">
                 <br>
                 <button class="room-btn" onclick="joinRoom()">CREATE / JOIN ROOM</button>
             </div>
@@ -229,15 +273,25 @@ def home():
 
         <div id="chat-main-screen">
             <div class="header">
-                <div class="room-title">❤️ VIP ROOM:<br><span id="displayRoomId">XXXXX</span></div>
+                <div class="room-title">❤️ VIP:<br><span id="displayRoomId">XXXXX</span></div>
+                
                 <div class="header-buttons">
+                    <select class="theme-select" id="themePicker" onchange="changeTheme(this.value)">
+                        <option value="pink">💕 Neon Pink</option>
+                        <option value="red">❤️ Dark Red</option>
+                        <option value="blue">⚡ Cyber Blue</option>
+                        <option value="green">🍃 Midnight Green</option>
+                    </select>
+                    
                     <button class="call-btn" onclick="startVideoCall()">📹 Call</button>
                     <button class="clear-btn" onclick="clearChat()">Clear</button>
-                    <div class="online-box">Online:<br>2</div>
+                    <div class="online-box">On:<br><span id="onlineCount">1</span></div>
                 </div>
             </div>
 
-            <div id="chat-box"></div>
+            <div id="chat-box">
+                <div class="encrypt-tag">🔐 End-to-End Encrypted VIP Chat</div>
+            </div>
 
             <div class="input-container">
                 <input type="text" id="msgInput" placeholder="मेसेज टाईप करा...">
@@ -254,26 +308,60 @@ def home():
 
         <script>
             let currentRoomId = "";
+            let myUsername = "";
             let lastMessageCount = 0;
 
-            // रूम जॉईन करण्याचा मुख्य फंक्शन
+            function changeTheme(theme) {
+                const root = document.documentElement;
+                if (theme === 'pink') {
+                    root.style.setProperty('--main-color', '#ff2a75');
+                    root.style.setProperty('--gradient-color', 'linear-gradient(135deg, #ff2a75, #ff5e62)');
+                } else if (theme === 'red') {
+                    root.style.setProperty('--main-color', '#ff0033');
+                    root.style.setProperty('--gradient-color', 'linear-gradient(135deg, #cc0000, #ff4444)');
+                } else if (theme === 'blue') {
+                    root.style.setProperty('--main-color', '#00ffcc');
+                    root.style.setProperty('--gradient-color', 'linear-gradient(135deg, #0055ff, #00ffcc)');
+                } else if (theme === 'green') {
+                    root.style.setProperty('--main-color', '#00ff66');
+                    root.style.setProperty('--gradient-color', 'linear-gradient(135deg, #006622, #00ff66)');
+                }
+            }
+
             function joinRoom() {
+                const nameInput = document.getElementById('usernameInput').value.trim();
                 const roomInput = document.getElementById('roomNumberInput').value.trim();
-                if(roomInput.length < 3) {
-                    alert("कृपया किमान ३ किंवा ५ अंकी नंबर टाका!");
+                
+                if(!nameInput || !roomInput) {
+                    alert("कृपया तुमचे नाव आणि रूम नंबर दोन्ही टाका!");
                     return;
                 }
                 
+                myUsername = nameInput;
                 currentRoomId = roomInput;
                 document.getElementById('displayRoomId').innerText = currentRoomId;
                 
-                // पहिली स्क्रीन लपवणे आणि मुख्य चॅट रूम चालू करणे
                 document.getElementById('room-selection-screen').style.display = 'none';
                 document.getElementById('chat-main-screen').style.display = 'flex';
                 
-                // दर २ सेकंदाला फक्त आपल्याच रूमचे मेसेज लोड करणे सुरू करणे
+                pingServerActive();
+                setInterval(pingServerActive, 5000);
+                
                 setInterval(loadMessages, 2000);
                 loadMessages();
+            }
+
+            function pingServerActive() {
+                if(!currentRoomId || !myUsername) return;
+                fetch('/ping', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({room: currentRoomId, user: myUsername})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('onlineCount').innerText = data.online_count;
+                });
             }
 
             function loadMessages() {
@@ -283,10 +371,16 @@ def home():
                 .then(res => res.json())
                 .then(data => {
                     const chatBox = document.getElementById('chat-box');
-                    chatBox.innerHTML = data.map(m => {
-                        const msgClass = m.user === 'Me' ? 'my-msg' : 'opp-msg';
-                        return `<div class="msg ${msgClass}">${m.text}</div>`;
-                    }).join('');
+                    let htmlContent = '<div class="encrypt-tag">🔐 End-to-End Encrypted VIP Chat</div>';
+                    
+                    data.forEach(m => {
+                        const isMe = m.user.toLowerCase() === myUsername.toLowerCase();
+                        const msgClass = isMe ? 'my-msg' : 'opp-msg';
+                        const nameLabel = isMe ? '' : `<span class="msg-user">${m.user}</span>`;
+                        htmlContent += `<div class="msg ${msgClass}">${nameLabel}${m.text}</div>`;
+                    });
+                    
+                    chatBox.innerHTML = htmlContent;
                     
                     if(data.length > lastMessageCount) {
                         chatBox.scrollTop = chatBox.scrollHeight;
@@ -303,7 +397,7 @@ def home():
                 fetch('/send-message', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text: text, user: 'Me', room: currentRoomId})
+                    body: JSON.stringify({text: text, user: myUsername, room: currentRoomId})
                 }).then(() => {
                     input.value = '';
                     loadMessages();
@@ -321,48 +415,64 @@ def home():
                 }
             }
 
-            // 📹 व्हिडिओ कॉल सुरू करणे (रूम नुसार पूर्णपणे स्वतंत्र)
+            // Room variable automatic map zalele video calling setup
             function startVideoCall() {
-                // जेणेकरून तुमच्या रूमचा कॉल दुसऱ्या कोणाला कनेक्ट होणार नाही
                 const callUrl = "https://meet.jit.si/PiyushVipSecretRoom_" + currentRoomId;
                 document.getElementById("video-frame").src = callUrl;
                 document.getElementById("video-container").style.display = "block";
             }
 
+            document.getElementById("msgInput").addEventListener("keyup", function(event) {
+                if (event.key === "Enter") { send(); }
+            });
+
             function endVideoCall() {
                 document.getElementById("video-frame").src = "";
                 document.getElementById("video-container").style.display = "none";
             }
-
-            document.getElementById("msgInput").addEventListener("keyup", function(event) {
-                if (event.key === "Enter") { send(); }
-            });
         </script>
     </body>
     </html>
     '''
 
+@app.route('/ping', methods=['POST'])
+def ping_user():
+    data = request.json or {}
+    room = data.get('room', 'default')
+    user = data.get('user', 'Unknown')
+    
+    if room not in room_data:
+        room_data[room] = {'messages': [], 'users': {}}
+    
+    room_data[room]['users'][user] = True
+    online_count = len(room_data[room]['users'])
+    
+    return jsonify({'status': 'success', 'online_count': online_count})
+
 @app.route('/get-messages', methods=['GET'])
 def get_messages():
     room = request.args.get('room', 'default')
-    return jsonify(room_messages.get(room, []))
+    if room in room_data:
+        return jsonify(room_data[room]['messages'])
+    return jsonify([])
 
 @app.route('/send-message', methods=['POST'])
 def send_message():
-    data = request.json
-    if data and data.get('text'):
+    data = request.json or {}
+    if data.get('text'):
         room = data.get('room', 'default')
-        if room not in room_messages:
-            room_messages[room] = []
-        room_messages[room].append({'user': data.get('user', 'User'), 'text': data.get('text', '')})
+        user = data.get('user', 'User')
+        if room not in room_data:
+            room_data[room] = {'messages': [], 'users': {}}
+        room_data[room]['messages'].append({'user': user, 'text': data.get('text', '')})
     return jsonify({'status': 'success'})
 
 @app.route('/clear-messages', methods=['POST'])
 def clear_messages():
-    data = request.json
+    data = request.json or {}
     room = data.get('room', 'default')
-    if room in room_messages:
-        room_messages[room] = []
+    if room in room_data:
+        room_data[room]['messages'] = []
     return jsonify({'status': 'success'})
 
 if __name__ == '__main__':
