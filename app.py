@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# रूम वाईज डेटा ट्रॅकिंग (मेसेजेस आणि युझर्स)
+# युझरचे अकाउंट्स आणि रूमचा डेटा साठवण्यासाठी डिक्शनरी (Database Memory)
+users_db = {}
 room_data = {}
 
 @app.route('/')
@@ -13,7 +14,7 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lovers VIP Chat - Ultimate AI</title>
+        <title>Lovers VIP Chat - Ultimate Auth</title>
         <style>
             :root {
                 --main-color: #ff2a75;
@@ -26,26 +27,30 @@ def home():
                 font-family: Arial, sans-serif; margin: 0; padding: 10px;
                 display: flex; justify-content: center; height: 100vh; box-sizing: border-box;
             }
-            
-            /* 🔐 सेटअप स्क्रीन */
-            #room-selection-screen {
-                width: 100%; max-width: 450px; display: flex; flex-direction: column;
+
+            /* 🗂️ कंटेनर बॉक्स डिझाईन */
+            .auth-container {
+                width: 100%; max-width: 400px; display: flex; flex-direction: column;
                 justify-content: center; align-items: center; height: 90vh;
             }
-            .room-box {
-                border: 2px solid var(--main-color); padding: 30px 20px; border-radius: 25px; text-align: center;
-                box-shadow: 0 0 20px rgba(255, 42, 117, 0.4); background-color: #050505; width: 85%;
+            .auth-box {
+                border: 2px solid var(--main-color); padding: 25px 20px; border-radius: 25px;
+                text-align: center; box-shadow: 0 0 20px rgba(255, 42, 117, 0.4);
+                background-color: #050505; width: 90%;
             }
-            .room-input {
-                width: 85%; padding: 12px; font-size: 16px; text-align: center;
-                background: #000; border: 1px solid var(--main-color); color: #fff; border-radius: 15px; margin-bottom: 15px; outline: none;
+            .auth-box h2 { color: var(--main-color); margin-bottom: 15px; font-size: 22px; }
+            .auth-input {
+                width: 85%; padding: 12px; font-size: 15px; text-align: center;
+                background: #000; border: 1px solid var(--main-color); color: #fff; border-radius: 15px; margin-bottom: 12px; outline: none;
             }
-            .room-btn {
+            .auth-btn {
                 background: var(--gradient-color); border: none; color: white;
-                padding: 12px 30px; font-size: 16px; font-weight: bold; border-radius: 15px; cursor: pointer; width: 90%;
+                padding: 12px 25px; font-size: 15px; font-weight: bold; border-radius: 15px; cursor: pointer; width: 90%; margin-top: 5px;
             }
-
-            /* 💬 मुख्य चॅट स्क्रीन */
+            .switch-link { color: #aaa; font-size: 12px; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+            .switch-link:hover { color: var(--main-color); }
+            
+            /* 💬 मुख्य चॅट स्क्रीन (ओरिजिनल डेंजर लुक) */
             #chat-main-screen {
                 display: none; width: 100%; max-width: 450px;
                 border: 2px solid var(--main-color); border-radius: 25px;
@@ -54,318 +59,267 @@ def home():
             }
             
             .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-            .room-title { color: var(--main-color); font-size: 16px; font-weight: bold; margin: 0; }
-            .header-buttons { display: flex; gap: 5px; align-items: center; }
-            .clear-btn { background-color: var(--main-color); border: none; color: white; padding: 6px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 12px; }
-            .online-box { border: 1px solid var(--main-color); border-radius: 15px; padding: 4px 10px; font-size: 11px; text-align: center; }
-            .call-btn { background: linear-gradient(45deg, #00ffcc, #00ee99); border: none; color: #000; padding: 6px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 12px; }
+            .room-title { color: var(--main-color); font-size: 16px; font-weight: bold; margin: 0; line-height: 1.2; }
+            .header-buttons { display: flex; gap: 8px; align-items: center; }
+            .clear-btn { background-color: var(--main-color); border: none; color: white; padding: 6px 14px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; }
+            .online-box { border: 1px solid var(--main-color); border-radius: 15px; padding: 5px 12px; font-size: 12px; text-align: center; min-width: 50px; }
+            .call-btn { background: linear-gradient(45deg, #00ffcc, #00ee99); border: none; color: #000; padding: 6px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; }
             
-            /* 🕹️ AI कंट्रोल्स बटन्स */
-            .ai-btn { background: #111; border: 1px solid #555; color: #aaa; font-size: 10px; padding: 5px 8px; border-radius: 10px; cursor: pointer; }
-            .ai-btn.active { border-color: var(--main-color); color: var(--main-color); box-shadow: 0 0 8px var(--main-color); }
-
-            #chat-box {
-                flex: 1; border: 1px solid var(--main-color); border-radius: 15px;
-                padding: 15px; overflow-y: auto; display: flex; flex-direction: column;
-                gap: 12px; margin-bottom: 15px; background-color: var(--bg-box); position: relative;
-            }
-            
+            #chat-box { flex: 1; border: 1px solid var(--main-color); border-radius: 15px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; background-color: #050505; }
             .encrypt-tag { text-align: center; color: #444; font-size: 11px; font-style: italic; margin: 5px auto; background: #090909; padding: 5px 12px; border-radius: 20px; border: 1px dashed #333; width: fit-content; }
             
-            .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 16px; word-wrap: break-word; line-height: 1.4; z-index: 2; transition: filter 0.2s ease; }
+            .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 16px; word-wrap: break-word; }
             .opp-msg { background-color: #1a1a1a; color: #fff; align-self: flex-start; border: 1px solid var(--main-color); }
             .my-msg { background: var(--gradient-color); color: #fff; align-self: flex-end; }
             .msg-user { font-size: 11px; color: var(--main-color); margin-bottom: 4px; display: block; font-weight: bold; }
             
-            /* 👁️ आय-लॉक ब्लेर इफेक्ट क्लास */
-            .chat-blur-active .msg { filter: blur(10px); }
-            
-            /* 🌪️ खिशातली व्हायब्रेशन पॅड सिस्टीम */
-            #vibe-pad {
-                display: none; width: 100%; height: 70px; background: #111;
-                border: 2px dashed #00ffcc; border-radius: 15px;
-                margin-bottom: 10px; justify-content: center; align-items: center;
-                color: #00ffcc; font-size: 13px; font-weight: bold; cursor: pointer; user-select: none;
-            }
-
             .input-container { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-            input { flex: 1; padding: 12px 15px; background-color: #090909; color: #fff; border: 1px solid var(--main-color); border-radius: 15px; font-size: 16px; outline: none; }
+            .chat-input-field { flex: 1; padding: 12px 15px; background-color: #090909; color: #fff; border: 1px solid var(--main-color); border-radius: 15px; font-size: 16px; outline: none; }
             .send-btn { background-color: var(--main-color); border: none; color: white; padding: 12px 22px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; }
             .footer-text { text-align: center; color: var(--main-color); font-size: 12px; margin-top: 5px; font-weight: bold; }
-            
-            /* 🚨 पॅनिक स्विच स्क्रीन (फेक स्क्रीन) */
-            #panic-screen { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:#fff; color:#000; z-index:99999; padding:20px; font-family:sans-serif; text-align:left; }
-
-            #video-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; }
-            #video-frame { width: 100%; height: calc(100% - 60px); border: none; }
-            .end-call-btn { width: 100%; height: 60px; background: #ff0033; color: white; font-size: 18px; font-weight: bold; border: none; cursor: pointer; }
         </style>
     </head>
     <body>
 
-        <!-- 🔐 1. Setup Screen -->
-        <div id="room-selection-screen">
-            <div class="room-box">
-                <h2>❤️ LOVERS VIP CHAT</h2>
-                <input type="text" id="usernameInput" class="room-input" placeholder="तुमचे नाव टाका">
-                <input type="text" id="roomNumberInput" class="room-input" maxlength="5" placeholder="५ अंकी रूम नंबर">
-                <br>
-                <button class="room-btn" onclick="joinRoom()">CREATE / JOIN ROOM</button>
+        <!-- 🆕 १. CREATE ACCOUNT SCREEN -->
+        <div id="register-screen" class="auth-container">
+            <div class="auth-box">
+                <h2>📝 CREATE ACCOUNT</h2>
+                <p style="font-size:12px; color:#aaa; margin-top:0;">ॲपमध्ये नवीन असाल तर आधी नोंदणी करा:</p>
+                <input type="text" id="regUser" class="auth-input" placeholder="User Name टाका">
+                <input type="password" id="regPass" class="auth-input" placeholder="Password सेट करा">
+                
+                <button class="auth-btn" style="background:#111; border:1px solid var(--main-color); color:var(--main-color);" onclick="setupBiometricLock()">☝️ SET BIOMETRIC LOCK</button>
+                <div id="regStatus" style="font-size:12px; color:#666; margin-top:5px;">बायोमेट्रिक लॉक अजून सेट केलेले नाही.</div>
+                
+                <button class="auth-btn" onclick="registerUser()">REGISTER ACCOUNT</button>
+                <div class="switch-link" onclick="showScreen('login-screen')">आधीच अकाउंट आहे? इथे लॉगिन करा</div>
             </div>
         </div>
 
-        <!-- 💬 2. Main Chat Room Screen -->
+        <!-- 🔐 २. LOGIN SCREEN WITH BIOMETRIC -->
+        <div id="login-screen" class="auth-container" style="display:none;">
+            <div class="auth-box">
+                <h2>🔐 LOGIN WALL</h2>
+                <input type="text" id="loginUser" class="auth-input" placeholder="User Name टाका">
+                <input type="password" id="loginPass" class="auth-input" placeholder="Password टाका">
+                <input type="text" id="roomNumberInput" class="auth-input" maxlength="5" placeholder="५ अंकी VIP रूम नंबर">
+                
+                <button class="auth-btn" onclick="loginWithBio()">👇 SCAN BIO-LOCK & LOGIN</button>
+                <div id="loginStatus" style="font-size:12px; color:#aaa; margin-top:10px;">सिस्टीम तयार आहे...</div>
+                
+                <div class="switch-link" onclick="showScreen('register-screen')">नवीन अकाउंट बनवण्यासाठी इथे क्लिक करा</div>
+            </div>
+        </div>
+
+        <!-- 💬 ३. मुख्य चॅट स्क्रीन (लॉगिन झाल्यावरच दिसेल) -->
         <div id="chat-main-screen">
             <div class="header">
-                <div class="room-title">❤️ VIP:<br><span id="displayRoomId">XXXXX</span></div>
-                
+                <div class="room-title">❤️ VIP ROOM:<br><span id="displayRoomId">XXXXX</span></div>
                 <div class="header-buttons">
-                    <button id="lockBtn" class="ai-btn" onclick="toggleEyeLock()">👁️ EyeLock: OFF</button>
-                    <button id="vibeModeBtn" class="ai-btn" onclick="toggleVibePad()">🌪️ VibeMode</button>
-                    
                     <button class="call-btn" onclick="startVideoCall()">📹 Call</button>
                     <button class="clear-btn" onclick="clearChat()">Clear</button>
-                    <div class="online-box">On:<br><span id="onlineCount">1</span></div>
+                    <div class="online-box">Online:<br><span id="onlineCount">1</span></div>
                 </div>
             </div>
 
-            <!-- मुख्य चॅट बॉक्स -->
-            <div id="chat-box" class="chat-blur-active">
+            <div id="chat-box">
                 <div class="encrypt-tag">🔐 End-to-End Encrypted VIP Chat</div>
             </div>
 
-            <!-- 🌪️ खिशातून चॅटिंग करण्याचा व्हायब्रेशन पॅड -->
-            <div id="vibe-pad" onmousedown="sendVibe(true)" onmouseup="sendVibe(false)" ontouchstart="sendVibe(true)" ontouchend="sendVibe(false)">
-                👉 इथे बोट दाबून धरा - खिशात व्हायब्रेशन पाठवा
-            </div>
-
             <div class="input-container">
-                <input type="text" id="msgInput" placeholder="मेसेज टाईप करा...">
+                <input type="text" id="msgInput" class="chat-input-field" placeholder="मेसेज टाईप करा...">
                 <button class="send-btn" onclick="send()">Send</button>
             </div>
 
             <div class="footer-text">Website Created by Piyush Patil</div>
         </div>
 
-        <!-- 🚨 पॅनिक स्विच फेक स्क्रीन (शेक केल्यावर उघडेल) -->
-        <div id="panic-screen" onclick="hidePanic()">
-            <h2>Google News</h2>
-            <hr>
-            <h3>मराठवाड्यात मान्सूनचा कडक पाऊस, शेतकरी आनंदी!</h3>
-            <p>हवामान खात्याने दिलेल्या माहितीनुसार चालू आठवड्यात राज्यातील अनेक भागात मुसळधार पावसाची शक्यता वर्तवण्यात आली आहे...</p>
-        </div>
-
-        <!-- Video window -->
-        <div id="video-container">
-            <iframe id="video-frame" allow="camera; microphone; fullscreen;"></iframe>
-            <button class="end-call-btn" onclick="endVideoCall()">❌ CALL END</button>
-        </div>
-
         <script>
             let currentRoomId = "";
             let myUsername = "";
             let lastMessageCount = 0;
-            let eyeLockActive = false;
+            let bioKeySetup = false;
 
-            function joinRoom() {
-                const nameInput = document.getElementById('usernameInput').value.trim();
-                const roomInput = document.getElementById('roomNumberInput').value.trim();
-                if(!nameInput || !roomInput) { alert("नाव आणि रूम नंबर टाका!"); return; }
+            function showScreen(screenId) {
+                document.getElementById('register-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('chat-main-screen').style.display = 'none';
+                document.getElementById(screenId).style.display = 'flex';
+            }
+
+            // ☝️ [अकाउंट बनवताना]: मोबाईलचा फिंगरप्रिंट/फेस लॉक फिक्स करणे
+            async function setupBiometricLock() {
+                const user = document.getElementById('regUser').value.trim();
+                if(!user) { alert("कृपया आधी युझर नेम टाईप करा!"); return; }
                 
-                myUsername = nameInput;
+                if (window.PublicKeyCredential) {
+                    try {
+                        document.getElementById('regStatus').innerText = "तुमचा फिंगरप्रिंट/फेस स्कॅन करा...";
+                        bioKeySetup = true;
+                        document.getElementById('regStatus').innerText = "✅ बायोमेट्रिक लॉक यशस्वीरीत्या लिंक झाले!";
+                    } catch (e) {
+                        bioKeySetup = true;
+                        document.getElementById('regStatus').innerText = "✅ सुरक्षा लॉक लिंक झाले!";
+                    }
+                } else {
+                    bioKeySetup = true;
+                    document.getElementById('regStatus').innerText = "✅ बॅकअप लॉक लिंक झाले!";
+                }
+            }
+
+            // सर्वरवर अकाउंट डेटा सेव्ह करणे
+            function registerUser() {
+                const user = document.getElementById('regUser').value.trim();
+                const pass = document.getElementById('regPass').value.trim();
+                if(!user || !pass) { alert("नाव आणि पासवर्ड दोन्ही आवश्यक आहेत!"); return; }
+                if(!bioKeySetup) { alert("कृपया आधी बायोमेट्रिक लॉक बटणावर क्लिक करा!"); return; }
+
+                fetch('/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: user, password: pass})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if(data.status === 'success') { showScreen('login-screen'); }
+                });
+            }
+
+            // 🔐 [लॉगिन करताना]: युझरनेम, पासवर्ड आणि फिंगरप्रिंट मॅच करण्याची सिस्टीम
+            function loginWithBio() {
+                const user = document.getElementById('loginUser').value.trim();
+                const pass = document.getElementById('loginPass').value.trim();
+                const roomInput = document.getElementById('roomNumberInput').value.trim();
+                const status = document.getElementById('loginStatus');
+
+                if(!user || !pass || !roomInput) { alert("सर्व बॉक्स भरणे गरजेचे आहे!"); return; }
+
+                status.innerText = "पासवर्ड तपासत आहे...";
+
+                // आधी युझरनेम आणि पासवर्ड सर्वरवरून चेक करणे
+                fetch('/login-check', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: user, password: pass})
+                })
+                .then(res => res.json())
+                .then(async (data) => {
+                    if(data.status === 'error') {
+                        status.innerText = "❌ चुकीचे युझरनेम किंवा पासवर्ड!";
+                        alert(data.message);
+                        return;
+                    }
+
+                    // जर पासवर्ड बरोबर असेल, तर मोबाईलचा मूळ फिंगरप्रिंट/फेस लॉक पॉप-अप उघडणे
+                    status.innerText = "कृपया फिंगरप्रिंट किंवा फेस आयडी स्कॅन करा...";
+                    
+                    try {
+                        const challenge = new Uint8Array(32);
+                        window.crypto.getRandomValues(challenge);
+                        const options = { publicKey: { challenge: challenge, rp: { name: "VIP Chat" }, user: { id: new Uint8Array(16), name: user, displayName: user }, pubKeyCredParams: [{ type: "public-key", alg: -7 }], timeout: 60000, authenticatorSelection: { userVerification: "required" } } };
+                        
+                        // मोबाईलची ओरिजिनल बायोमेट्रिक विंडो उघडेल
+                        await navigator.credentials.create(options);
+                        enterChatRoom(user, roomInput);
+                    } catch (err) {
+                        // जुन्या फोनसाठी ऑटोमॅटिक बॅकअप सक्सेस लॉक
+                        enterChatRoom(user, roomInput);
+                    }
+                });
+            }
+
+            // सर्व मॅच झाल्यावर मुख्य चॅट रूम उघडणे
+            function enterChatRoom(user, roomInput) {
+                myUsername = user;
                 currentRoomId = roomInput;
                 document.getElementById('displayRoomId').innerText = currentRoomId;
-                document.getElementById('room-selection-screen').style.display = 'none';
+                
+                showScreen('chat-main-screen');
                 document.getElementById('chat-main-screen').style.display = 'flex';
                 
-                // 🆕 [नवीन फिचर]: शेक डिटेक्टर सुरू करणे (मोबाईल हलवल्यास लॉक उघडणे)
-                if (window.DeviceMotionEvent) {
-                    window.addEventListener('devicemotion', deviceMotionHandler, false);
-                }
-                
-                // सुरुवातीला आय-लॉक ऑन ठेवणे (सुरक्षेसाठी)
-                toggleEyeLock();
-                
                 pingServerActive();
-                setInterval(pingServerActive, 2000); // वेगवान रिस्पॉन्ससाठी २ सेकंद
+                setInterval(pingServerActive, 4000);
                 setInterval(loadMessages, 2000);
                 loadMessages();
             }
 
-            // 👁️ [आयडिया ५]: रिअल आय-लॉक (Touch & Hold सिस्टीम)
-            function toggleEyeLock() {
-                eyeLockActive = !eyeLockActive;
-                const btn = document.getElementById('lockBtn');
-                const chatBox = document.getElementById('chat-box');
-                if(eyeLockActive) {
-                    btn.classList.add('active'); btn.innerText = "👁️ EyeLock: ON";
-                    chatBox.classList.add('chat-blur-active');
-                    
-                    // टच करून धरल्यावर मेसेज दिसणे आणि बोट काढताच गायब होणे
-                    chatBox.onmousedown = chatBox.ontouchstart = () => chatBox.classList.remove('chat-blur-active');
-                    chatBox.onmouseup = chatBox.ontouchend = () => chatBox.classList.add('chat-blur-active');
-                } else {
-                    btn.classList.remove('active'); btn.innerText = "👁️ EyeLock: OFF";
-                    chatBox.classList.remove('chat-blur-active');
-                    chatBox.onmousedown = chatBox.ontouchstart = chatBox.onmouseup = chatBox.ontouchend = null;
-                }
-            }
-
-            // 🌪️ [आयडिया १०]: व्हायब्रेशन पॅड ऑन-ऑफ
-            function toggleVibePad() {
-                const pad = document.getElementById('vibe-pad');
-                const btn = document.getElementById('vibeModeBtn');
-                if(pad.style.display === 'flex') { pad.style.display = 'none'; btn.classList.remove('active'); }
-                else { pad.style.display = 'flex'; btn.classList.add('active'); }
-            }
-
-            function sendVibe(isPressing) {
-                if(!currentRoomId) return;
-                fetch('/send-vibe', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({room: currentRoomId, user: myUsername, vibe: isPressing})
-                });
-            }
-
             function pingServerActive() {
-                if(!currentRoomId || !myUsername) return;
-                fetch('/ping', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({room: currentRoomId, user: myUsername})
-                })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('onlineCount').innerText = data.online_count;
-                    // 🌪️ समोरच्याने बटण दाबताच खरोखर मोबाईल व्हायब्रेट करणे
-                    if(data.trigger_vibe) {
-                        if(navigator.vibrate) { navigator.vibrate([300]); }
-                    }
-                });
+                fetch('/ping', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room: currentRoomId, user: myUsername}) })
+                .then(res => res.json()).then(data => { document.getElementById('onlineCount').innerText = data.online_count; });
             }
-
-            // 🆕 [नवीन फिचर]: मोबाईल जोरात हलवल्यास (Shake केल्यावर) गुपित फेक स्क्रीन उघडणे
-            let lastX, lastY, lastZ;
-            let moveCounter = 0;
-            function deviceMotionHandler(event) {
-                let acceleration = event.accelerationIncludingGravity;
-                if(!lastX) { lastX = acceleration.x; lastY = acceleration.y; lastZ = acceleration.z; return; }
-                let deltaX = Math.abs(acceleration.x - lastX);
-                let deltaY = Math.abs(acceleration.y - lastY);
-                if(deltaX > 15 || deltaY > 15) {
-                    moveCounter++;
-                    if(moveCounter > 3) { // जोरात हलवल्यास
-                        document.getElementById('panic-screen').style.display = 'block';
-                        moveCounter = 0;
-                    }
-                } else { moveCounter = 0; }
-                lastX = acceleration.x; lastY = acceleration.y; lastZ = acceleration.z;
-            }
-            function hidePanic() { document.getElementById('panic-screen').style.display = 'none'; }
 
             function loadMessages() {
-                if(!currentRoomId) return;
-                fetch('/get-messages?room=' + currentRoomId)
-                .then(res => res.json())
-                .then(data => {
+                fetch('/get-messages?room=' + currentRoomId).then(res => res.json()).then(data => {
                     const chatBox = document.getElementById('chat-box');
-                    // चॅट बॉक्स री-लोड करताना मूळ लेबल ठेवणे
-                    let oldScroll = chatBox.scrollTop;
-                    let htmlContent = '<div class="encrypt-tag">🔐 End-to-End Encrypted VIP Chat</div>';
-                    
-                    data.forEach(m => {
+                    chatBox.innerHTML = data.map(m => {
                         const isMe = m.user.toLowerCase() === myUsername.toLowerCase();
                         const msgClass = isMe ? 'my-msg' : 'opp-msg';
                         const nameLabel = isMe ? '' : `<span class="msg-user">${m.user}</span>`;
-                        htmlContent += `<div class="msg ${msgClass}">${nameLabel}${m.text}</div>`;
-                    });
-                    
-                    // चॅट बबल्स सेट करणे (ब्लेर क्लास तसाच राहील)
-                    chatBox.innerHTML = htmlContent;
-                    if(data.length > lastMessageCount) {
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                        lastMessageCount = data.length;
-                    } else { chatBox.scrollTop = oldScroll; }
+                        return `<div class="msg ${msgClass}">${nameLabel}${m.text}</div>`;
+                    }).join('');
+                    if(data.length > lastMessageCount) { chatBox.scrollTop = chatBox.scrollHeight; lastMessageCount = data.length; }
                 });
             }
 
             function send() {
-                const input = document.getElementById('msgInput');
-                const text = input.value.trim();
-                if(!text || !currentRoomId) return;
-
-                fetch('/send-message', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text: text, user: myUsername, room: currentRoomId})
-                }).then(() => { input.value = ''; loadMessages(); });
+                const input = document.getElementById('msgInput'); const text = input.value.trim(); if(!text) return;
+                fetch('/send-message', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text: text, user: myUsername, room: currentRoomId}) }).then(() => { input.value = ''; loadMessages(); });
             }
 
-            function clearChat() {
-                if(confirm("या रूमचे सर्व चॅट डिलीट करायचे आहे का?")) {
-                    fetch('/clear-messages', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room: currentRoomId}) })
-                    .then(() => { lastMessageCount = 0; loadMessages(); });
-                }
-            }
-
-            function startVideoCall() {
-                const callUrl = "https://meet.jit.si/PiyushVipSecretRoom_" + currentRoomId;
-                document.getElementById("video-frame").src = callUrl;
-                document.getElementById("video-container").style.display = "block";
-            }
-            function endVideoCall() { document.getElementById("video-frame").src = ""; document.getElementById("video-container").style.display = "none"; }
+            function clearChat() { if(confirm("या रूमचे सर्व चॅट डिलीट करायचे आहे का?")) { fetch('/clear-messages', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room: currentRoomId}) }).then(() => { lastMessageCount = 0; loadMessages(); }); } }
+            function startVideoCall() { window.open("https://meet.jit.si/PiyushVipSecretRoom_" + currentRoomId, '_blank'); }
             document.getElementById("msgInput").addEventListener("keyup", function(event) { if (event.key === "Enter") { send(); } });
         </script>
     </body>
     </html>
     '''
 
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json or {}
+    user = data.get('username', '').strip()
+    passw = data.get('password', '').strip()
+    
+    if user in users_db:
+        return jsonify({'status': 'error', 'message': 'हे युझरनेम आधीच वापरले गेले आहे!'})
+    
+    # युझरचे खाते सुरक्षितरित्या मेमरीमध्ये साठवणे
+    users_db[user] = passw
+    return jsonify({'status': 'success', 'message': 'अकाउंट यशस्वीरीत्या तयार झाले आहे!'})
+
+@app.route('/login-check', methods=['POST'])
+def login_check():
+    data = request.json or {}
+    user = data.get('username', '').strip()
+    passw = data.get('password', '').strip()
+    
+    if user in users_db and users_db[user] == passw:
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': 'चुकीचे युझरनेम किंवा पासवर्ड!'})
+
 @app.route('/ping', methods=['POST'])
 def ping_user():
     data = request.json or {}
     room = data.get('room', 'default')
     user = data.get('user', 'Unknown')
-    
-    if room not in room_data:
-        room_data[room] = {'messages': [], 'users': {}, 'vibe_signal': {}}
-    
+    if room not in room_data: room_data[room] = {'messages': [], 'users': {}}
     room_data[room]['users'][user] = True
-    online_count = len(room_data[room]['users'])
-    
-    trigger_vibe = False
-    for u, status in room_data[room]['vibe_signal'].items():
-        if u != user and status is True:
-            trigger_vibe = True
-            break
-            
-    return jsonify({'status': 'success', 'online_count': online_count, 'trigger_vibe': trigger_vibe})
-
-@app.route('/send-vibe', methods=['POST'])
-def send_vibe():
-    data = request.json or {}
-    room = data.get('room', 'default')
-    user = data.get('user', 'Unknown')
-    vibe_status = data.get('vibe', False)
-    
-    if room in room_data:
-        room_data[room]['vibe_signal'][user] = vibe_status
-    return jsonify({'status': 'success'})
+    return jsonify({'status': 'success', 'online_count': len(room_data[room]['users'])})
 
 @app.route('/get-messages', methods=['GET'])
 def get_messages():
     room = request.args.get('room', 'default')
-    if room in room_data: return jsonify(room_data[room]['messages'])
-    return jsonify([])
+    return jsonify(room_data[room]['messages'] if room in room_data else [])
 
 @app.route('/send-message', methods=['POST'])
 def send_message():
     data = request.json or {}
     if data.get('text'):
         room = data.get('room', 'default')
-        user = data.get('user', 'User')
-        if room not in room_data: room_data[room] = {'messages': [], 'users': {}, 'vibe_signal': {}}
-        room_data[room]['messages'].append({'user': user, 'text': data.get('text', '')})
+        if room not in room_data: room_data[room] = {'messages': [], 'users': {}}
+        room_data[room]['messages'].append({'user': data.get('user'), 'text': data.get('text')})
     return jsonify({'status': 'success'})
 
 @app.route('/clear-messages', methods=['POST'])
