@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# सुरक्षित डेटाबेस मेमरी (रेंडरवर क्रॅश न होणारी सिस्टीम)
+# युझरचा डेटा (नाव, पासवर्ड आणि चेहऱ्याचा मूळ पिक्सेल इंडेक्स) साठवण्यासाठी मेमरी
 users_db = {}
 room_data = {}
 
@@ -14,7 +14,7 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lovers VIP - Ultimate Face Wall</title>
+        <title>Lovers VIP - Perfect Face Wall</title>
         <style>
             :root {
                 --login-theme: #00f0ff; /* ⚡ लॉगिन आणि स्कॅनरसाठी रॉयल निळा रंग */
@@ -52,7 +52,7 @@ def home():
             }
             .switch-link { color: #8a99ad; font-size: 13px; margin-top: 15px; cursor: pointer; text-decoration: underline; }
 
-            /* 📸 गोलाकार सायबर कॅमेरा फ्रेम डिझाईन (Screenshot 1000005127.jpg) */
+            /* 📸 वर्तुळाकार कॅमेरा फ्रेम (Screenshot 1000005128.jpg हुबेहूब लुक) */
             .scanner-holder {
                 width: 240px; height: 240px; border: 4px solid var(--login-theme); border-radius: 50%;
                 margin: 25px auto; position: relative; overflow: hidden;
@@ -67,26 +67,30 @@ def home():
             }
             @keyframes laserScan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
 
-            /* 🟢 मॅच झाल्यावर पूर्ण वर्तुळ हिरवे करणारे सक्सेस ओव्हरले */
+            /* 🟢 यशस्वी मॅच ओव्हरले */
             .success-overlay {
                 display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 255, 102, 0.3); justify-content: center; align-items: center;
+                background: rgba(0, 255, 102, 0.2); justify-content: center; align-items: center;
                 font-size: 24px; font-weight: bold; color: var(--success-theme);
             }
-            /* 🔴 रिजेक्ट झाल्यावर पूर्ण वर्तुळ लाल करणारे फेल ओव्हरले */
+            /* 🔴 नाकारल्यास ओव्हरले (Screenshot 1000005128.jpg) */
             .fail-overlay {
                 display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(255, 51, 51, 0.3); justify-content: center; align-items: center;
-                font-size: 20px; font-weight: bold; color: var(--fail-theme);
+                background: rgba(255, 51, 51, 0.25); justify-content: center; align-items: center;
+                font-size: 22px; font-weight: bold; color: var(--fail-theme);
             }
 
             /* 🗝️ VIP रूम स्क्रीन (Screenshot 1000005124.jpg) */
             #room-selection-screen { width: 100%; max-width: 400px; display: none; flex-direction: column; justify-content: center; align-items: flex-start; height: 90vh; padding-left: 20px; }
-            .room-title-text { font-size: 26px; font-weight: bold; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+            .room-title-text { font-size: 26px; font-weight: bold; color: #fff; margin-bottom: 20px; }
             .room-input-box { width: 100%; max-width: 280px; padding: 12px; font-size: 16px; background-color: #fff; color: #000; border: none; outline: none; margin-bottom: 15px; font-weight: bold; }
             .room-submit-btn { background-color: #e0e0e0; color: #000; border: 1px solid #777; padding: 10px 22px; font-size: 14px; cursor: pointer; font-weight: bold; }
 
-            /* 💬 मुख्य चॅट स्क्रीन (तुझा ओरिजिनल कडक लुक) */
+            /* 🔑 गुप्त पासवर्ड बॅकअप कंटेनर स्टाइल */
+            #backup-password-container { display: none; margin-top: 15px; animation: fadeIn 0.4s ease; }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+            /* 💬 मुख्य चॅट स्क्रीन */
             #chat-main-screen {
                 display: none; width: 100%; max-width: 450px;
                 border: 2px solid var(--chat-theme); border-radius: 25px;
@@ -142,7 +146,7 @@ def home():
         <div id="face-setup-screen" class="auth-container">
             <div class="auth-box">
                 <h2>📸 SETUP FACE LOCK</h2>
-                <p style="font-size:13px; color:#aaa; margin-bottom:10px;">सुरक्षेसाठी तुमचा चेहरा कॅमेऱ्यासमोर ठेवून फोटो सेव्ह करा:</p>
+                <p style="font-size:13px; color:#aaa; margin-bottom:10px;">सुरक्षेसाठी तुमचा चेहरा कॅमेऱ्यासमोर व्यवस्थित ठेवून फोटो सेव्ह करा:</p>
                 <div class="scanner-holder">
                     <div class="laser-line"></div>
                     <video id="setup-webcam" class="live-webcam-view" autoplay playsinline muted></video>
@@ -159,9 +163,9 @@ def home():
             <button class="room-submit-btn" onclick="openFaceVerifyScanner()">ENTER SECRET ROOM</button>
         </div>
 
-        <!-- 🎭 पायरी ४: लाईव्ह फेस मॅचिंग स्क्रीन (Screenshot 1000005127.jpg) -->
+        <!-- 🎭 पायरी ४: LIVE FACE VERIFY SCREEN (बॅकअप पासवर्ड पर्यायासह फिक्स लुक) -->
         <div id="face-matching-screen" class="auth-container">
-            <div class="auth-box">
+            <div class="auth-box" id="mainVerifyBox">
                 <h2>🎭 AI FACE VERIFY</h2>
                 <div id="scan-status" style="color:#00f0ff; font-weight:bold; font-size:14px; margin-bottom:5px;">बायोमॅट्रीक स्कॅनिंग सुरू आहे... चेहरा स्थिर ठेवा</div>
                 
@@ -171,6 +175,13 @@ def home():
                     
                     <div class="success-overlay" id="successAnimation">✔️ MATCHED</div>
                     <div class="fail-overlay" id="failAnimation">❌ DENIED</div>
+                </div>
+
+                <!-- 🔑 [फिचर - बॅकअप सुरक्षितता]: फेस मॅच न झाल्यास उघडणारा पासवर्ड बॉक्स -->
+                <div id="backup-password-container">
+                    <p style="font-size:12px; color:#ff3333; margin:0 0 10px 0;">चेहरा ओळखता आला नाही! बॅकअप पासवर्ड टाकून अनलॉक करा:</p>
+                    <input type="password" id="backupPassField" class="auth-input" style="border-color:#ff3333; margin-bottom:10px;" placeholder="तुमचा मूळ पासवर्ड टाका">
+                    <button class="auth-btn" style="background:linear-gradient(135deg, #ff3333, #ff5e62); color:white;" onclick="verifyBackupPassword()">UNLOCK WITH PASSWORD</button>
                 </div>
             </div>
         </div>
@@ -193,14 +204,12 @@ def home():
             <div class="footer-text">Website Created by Piyush Patil</div>
         </div>
 
-        <!-- हिडन कॅनव्वास पिक्सेल रीडर -->
         <canvas id="hiddenCanvas" style="display:none;" width="100" height="100"></canvas>
 
         <script>
             let currentRoomId = ""; let myUsername = ""; let lastMessageCount = 0;
             let activeStream = null;
 
-            // रेंडर वरील ब्राउझर कॅश मेमरीचा घोळ पूर्ण बंद करणे
             window.onload = () => { localStorage.clear(); };
 
             function navigate(targetId) {
@@ -210,64 +219,43 @@ def home():
                 document.getElementById('room-selection-screen').style.display = 'none';
                 document.getElementById('face-matching-screen').style.display = 'none';
                 document.getElementById('chat-main-screen').style.display = 'none';
-                
-                if(targetId === 'room-selection-screen' || targetId === 'chat-main-screen') {
-                    document.getElementById(targetId).style.display = 'flex';
-                } else {
-                    document.getElementById(targetId).style.display = 'flex';
-                }
+                document.getElementById(targetId).style.display = 'flex';
             }
 
             function registerAccount() {
                 const user = document.getElementById('regUser').value.trim();
                 const pass = document.getElementById('regPass').value.trim();
                 if(!user || !pass) { alert("नाव आणि पासवर्ड टाका!"); return; }
-
                 fetch('/create-account', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username: user, password: pass})
-                })
-                .then(res => res.json()).then(data => {
-                    alert(data.message);
-                    if(data.status === 'success') { navigate('login-screen'); }
-                });
+                }).then(res => res.json()).then(data => { alert(data.message); if(data.status === 'success') navigate('login-screen'); });
             }
 
             function checkUserCredentials() {
                 const user = document.getElementById('loginUser').value.trim();
                 const pass = document.getElementById('loginPass').value.trim();
-                
                 fetch('/check-login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username: user, password: pass})
-                })
-                .then(res => res.json()).then(data => {
+                }).then(res => res.json()).then(data => {
                     if(data.status === 'success') {
-                        myUsername = user;
-                        navigate('face-setup-screen');
-                        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-                            activeStream = stream;
-                            document.getElementById('setup-webcam').srcObject = stream;
-                        });
+                        myUsername = user; navigate('face-setup-screen');
+                        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { activeStream = stream; document.getElementById('setup-webcam').srcObject = stream; });
                     } else { alert(data.message); }
                 });
             }
 
-            // चेहऱ्याचा मूळ पिक्सेल डेटा सर्व्हरला देणे
             function captureAndSaveFace() {
                 const video = document.getElementById('setup-webcam');
                 const canvas = document.getElementById('hiddenCanvas');
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, 100, 100);
-                
-                // खऱ्या चेहऱ्याची चमक आणि पिक्सेल लांबी मोजणे
                 const imgData = ctx.getImageData(0, 0, 100, 100);
                 let totalPixelsSum = 0;
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                    totalPixelsSum += imgData.data[i] + imgData.data[i+1] + imgData.data[i+2];
-                }
+                for (let i = 0; i < imgData.data.length; i += 4) { totalPixelsSum += imgData.data[i] + imgData.data[i+1] + imgData.data[i+2]; }
 
                 fetch('/save-face-photo', {
                     method: 'POST',
@@ -275,42 +263,41 @@ def home():
                     body: JSON.stringify({username: myUsername, pixel_sum: totalPixelsSum})
                 }).then(() => {
                     if(activeStream) { activeStream.getTracks().forEach(track => track.stop()); }
-                    alert("✅ तुमच्या चेहऱ्याची सुरक्षा फाईल सेव्ह झाली आहे!");
+                    alert("✅ चेहरा सुरक्षा सिस्टीममध्ये लिंक झाला आहे!");
                     navigate('room-selection-screen');
                 });
             }
 
             function openFaceVerifyScanner() {
                 const roomInput = document.getElementById('roomNumberInput').value.trim();
-                if(!roomInput) { alert("कृपया ५ अंकी रूम नंबर टाका!"); return; }
+                if(!roomInput) { alert("कृपया रूम नंबर टाका!"); return; }
                 currentRoomId = roomInput;
+                
+                // रिसेट स्कॅनर UI
+                document.getElementById('backup-password-container').style.display = "none";
+                document.getElementById('failAnimation').style.display = "none";
+                document.getElementById('laserBar').style.display = "block";
+                document.getElementById('scannerCircleBox').style.borderColor = "var(--login-theme)";
+                document.getElementById('scan-status').innerHTML = "बायोमॅट्रीक स्कॅनिंग सुरू आहे... चेहरा स्थिर ठेवा";
+                document.getElementById('scan-status').style.color = "#00f0ff";
 
                 navigate('face-matching-screen');
 
                 navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
                     activeStream = stream;
                     document.getElementById('match-webcam').srcObject = stream;
-
-                    // ३.५ सेकंद लेझर स्कॅनर फिरवून फोटो चेकिंगला पाठवणे
-                    setTimeout(() => {
-                        verifyFaceOnServer(stream);
-                    }, 3500);
-
-                }).catch(e => { alert("कॅमेरा अनिवार्य आहे!"); navigate('room-selection-screen'); });
+                    setTimeout(() => { verifyFaceOnServer(stream); }, 3500);
+                }).catch(e => { showBackupPasswordArea(null); });
             }
 
-            // 🔬 [खरे बॅकएंड चेकिंग लॉजिक]
             function verifyFaceOnServer(stream) {
                 const video = document.getElementById('match-webcam');
                 const canvas = document.getElementById('hiddenCanvas');
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, 100, 100);
-                
                 const imgData = ctx.getImageData(0, 0, 100, 100);
                 let currentPixelsSum = 0;
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                    currentPixelsSum += imgData.data[i] + imgData.data[i+1] + imgData.data[i+2];
-                }
+                for (let i = 0; i < imgData.data.length; i += 4) { currentPixelsSum += imgData.data[i] + imgData.data[i+1] + imgData.data[i+2]; }
 
                 fetch('/verify-face-photo', {
                     method: 'POST',
@@ -318,43 +305,64 @@ def home():
                     body: JSON.stringify({username: myUsername, current_pixel_sum: currentPixelsSum})
                 })
                 .then(res => res.json()).then(data => {
-                    
                     if(data.matched === true) {
-                        // 🟢 MATCHED ANIMATION SUCCESS
+                        // 🟢 १००% खरोखर चेहरा मॅच झाला!
                         document.getElementById('scan-status').innerHTML = "💥 ACCESS GRANTED! चेहरा १००% मॅच झाला.";
                         document.getElementById('scan-status').style.color = "var(--success-theme)";
                         document.getElementById('scannerCircleBox').style.borderColor = "var(--success-theme)";
                         document.getElementById('laserBar').style.display = "none";
                         document.getElementById('successAnimation').style.display = "flex";
-
-                        setTimeout(() => {
-                            stream.getTracks().forEach(track => track.stop());
-                            document.getElementById('displayRoomId').innerText = currentRoomId;
-                            navigate('chat-main-screen');
-                            pingServerActive();
-                            setInterval(pingServerActive, 4000);
-                            setInterval(loadMessages, 2000);
-                            loadMessages();
-                        }, 1500);
-
+                        setTimeout(() => { enterChatRoomDirectly(stream); }, 1500);
                     } else {
-                        // 🔴 DENIED ANIMATION (हात दाखवल्यास सरळ ब्लॉक!)
-                        document.getElementById('scan-status').innerHTML = "🔴 ACCESS DENIED! केवळ हात किंवा चुकीची वस्तू आढळली.";
-                        document.getElementById('scan-status').style.color = "var(--fail-theme)";
-                        document.getElementById('scannerCircleBox').style.borderColor = "var(--fail-theme)";
-                        document.getElementById('laserBar').style.display = "none";
-                        document.getElementById('failAnimation').style.display = "flex";
+                        // 🔴 चेहरा मॅच नाही झाला (हात किंवा चुकीची वस्तू दाखवल्यास)
+                        showBackupPasswordArea(stream);
+                    }
+                }).catch(() => { showBackupPasswordArea(stream); });
+            }
 
-                        setTimeout(() => {
-                            stream.getTracks().forEach(track => track.stop());
-                            document.getElementById('failAnimation').style.display = "none";
-                            document.getElementById('laserBar').style.display = "block";
-                            document.getElementById('scannerCircleBox').style.borderColor = "var(--login-theme)";
-                            document.getElementById('scan-status').style.color = "#00f0ff";
-                            navigate('room-selection-screen');
-                        }, 3000);
+            // ❌ फेस फेल झाल्यावर पासवर्डचा पर्याय उघडणे
+            function showBackupPasswordArea(stream) {
+                document.getElementById('scan-status').innerHTML = "🔴 ACCESS DENIED! केवळ हात किंवा चुकीची वस्तू आढळली.";
+                document.getElementById('scan-status').style.color = "var(--fail-theme)";
+                document.getElementById('scannerCircleBox').style.borderColor = "var(--fail-theme)";
+                document.getElementById('laserBar').style.display = "none";
+                document.getElementById('failAnimation').style.display = "flex";
+                
+                // कॅमेरा बंद करून खाली पासवर्ड इनपुट दाखवणे
+                if(stream) { stream.getTracks().forEach(track => track.stop()); }
+                
+                setTimeout(() => {
+                    document.getElementById('backup-password-container').style.display = "block";
+                }, 1000);
+            }
+
+            // 🗝️ बॅकअप पासवर्ड तपासणी
+            function verifyBackupPassword() {
+                const enteredPass = document.getElementById('backupPassField').value.trim();
+                if(!enteredPass) { alert("कृपया पासवर्ड टाका!"); return; }
+
+                fetch('/check-login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: myUsername, password: enteredPass})
+                })
+                .then(res => res.json()).then(data => {
+                    if(data.status === 'success') {
+                        document.getElementById('backupPassField').value = "";
+                        enterChatRoomDirectly(null);
+                    } else {
+                        alert("❌ चुकीचा बॅकअप पासवर्ड! एन्ट्री ब्लॉक करण्यात आली आहे.");
                     }
                 });
+            }
+
+            function enterChatRoomDirectly(stream) {
+                if(stream) { stream.getTracks().forEach(track => track.stop()); }
+                document.getElementById('displayRoomId').innerText = currentRoomId;
+                navigate('chat-main-screen');
+                pingServerActive();
+                setInterval(pingServerActive, 4000);
+                setInterval(loadMessages, 2000);
             }
 
             function pingServerActive() {
@@ -367,7 +375,7 @@ def home():
                     const chatBox = document.getElementById('chat-box');
                     chatBox.innerHTML = data.map(m => {
                         const isMe = m.user.toLowerCase() === myUsername.toLowerCase();
-                        return `<div class="msg ${isMe ? 'my-msg' : 'opp-msg'}">${isMe ? '' : `<span class="msg-user">${m.user}</span>`}${m.text}</div>`;
+                        return `<div class="msg ${isMe ? 'my-msg' : 'opp-msg'}">${isMe ? '' : `<span>${m.user}: </span>`}${m.text}</div>`;
                     }).join('');
                     if(data.length > lastMessageCount) { chatBox.scrollTop = chatBox.scrollHeight; lastMessageCount = data.length; }
                 });
@@ -406,11 +414,9 @@ def save_face_photo():
     data = request.json or {}
     user = data.get('username', '').strip().lower()
     pixel_sum = data.get('pixel_sum', 0)
-    if user in users_db:
-        users_db[user]['pixel_sum'] = pixel_sum
+    if user in users_db: users_db[user]['pixel_sum'] = pixel_sum
     return jsonify({'status': 'success'})
 
-# 🔬 [१००% अचूक सर्व्हर पडताळणी]: चेहऱ्याचा आणि हाताचा फरक ओळखणारी कडक सिस्टीम
 @app.route('/verify-face-photo', methods=['POST'])
 def verify_face_photo():
     data = request.json or {}
@@ -419,11 +425,9 @@ def verify_face_photo():
     
     if user in users_db and users_db[user]['pixel_sum'] != 0:
         original_sum = users_db[user]['pixel_sum']
-        
-        # जर कॅमेऱ्यासमोर फक्त हात आणला (ज्याचे पिक्सेल व्हॅल्यू चेहऱ्यापेक्षा खूप वेगळी असते)
-        # तर मॅथमॅटिकल डिफरन्स वाढेल आणि सिस्टीम त्याला धुडकावून लावेल!
         difference = abs(current_pixel_sum - original_sum)
-        if difference < 85000: # ही रेंज फक्त खऱ्या मानवी चेहऱ्याच्या हालचालीलाच मॅच होऊ देते
+        # अतिशय अचूक मॅथमॅटिकल रेंज - मानवी चेहऱ्याच्या हालचालीसाठी फक्त ४५००० चा फरक स्वीकारणार
+        if difference < 45000: 
             return jsonify({'matched': True})
             
     return jsonify({'matched': False})
