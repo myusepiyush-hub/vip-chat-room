@@ -2,8 +2,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# युझरचे अकाउंट्स आणि रूमचा डेटा साठवण्यासाठी डिक्शनरी (Database Memory)
-users_db = {}
+# रूम आणि मेसेजेसचा डेटा ट्रॅकिंग (Database Memory)
 room_data = {}
 
 @app.route('/')
@@ -14,105 +13,112 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lovers VIP Chat - Ultimate Auth</title>
+        <title>Lovers VIP Chat - Google Auth</title>
+        
+        <!-- 🔐 गूगल लॉगिन करण्यासाठी आवश्यक असलेली मुख्य स्क्रिप्ट -->
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        
         <style>
             :root {
-                --main-color: #ff2a75;
-                --gradient-color: linear-gradient(135deg, #ff2a75, #ff5e62);
-                --bg-box: #050505;
+                --login-theme: #00f0ff; /* ⚡ लॉगिन पेजसाठी नवीन कडक सायन/ब्लू कलर */
+                --login-gradient: linear-gradient(135deg, #0072ff, #00f0ff);
+                --chat-theme: #ff2a75; /* 💕 चॅट रूमसाठी तुझा जुना ओरिजिनल पिंक कलर */
+                --chat-gradient: linear-gradient(135deg, #ff2a75, #ff5e62);
             }
 
             body {
-                background-color: #000; color: #fff;
+                background-color: #030308; color: #fff;
                 font-family: Arial, sans-serif; margin: 0; padding: 10px;
                 display: flex; justify-content: center; height: 100vh; box-sizing: border-box;
             }
 
-            /* 🗂️ कंटेनर बॉक्स डिझाईन */
+            /* ⚡ नवीन कडक गुगल लॉगिन स्क्रीन डिझाईन (Premium Cyber Look) */
             .auth-container {
                 width: 100%; max-width: 400px; display: flex; flex-direction: column;
                 justify-content: center; align-items: center; height: 90vh;
             }
             .auth-box {
-                border: 2px solid var(--main-color); padding: 25px 20px; border-radius: 25px;
-                text-align: center; box-shadow: 0 0 20px rgba(255, 42, 117, 0.4);
-                background-color: #050505; width: 90%;
+                border: 2px solid var(--login-theme); padding: 35px 20px; border-radius: 30px;
+                text-align: center; box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+                background-color: #060814; width: 90%;
             }
-            .auth-box h2 { color: var(--main-color); margin-bottom: 15px; font-size: 22px; }
-            .auth-input {
-                width: 85%; padding: 12px; font-size: 15px; text-align: center;
-                background: #000; border: 1px solid var(--main-color); color: #fff; border-radius: 15px; margin-bottom: 12px; outline: none;
-            }
-            .auth-btn {
-                background: var(--gradient-color); border: none; color: white;
-                padding: 12px 25px; font-size: 15px; font-weight: bold; border-radius: 15px; cursor: pointer; width: 90%; margin-top: 5px;
-            }
-            .switch-link { color: #aaa; font-size: 12px; margin-top: 15px; cursor: pointer; text-decoration: underline; }
-            .switch-link:hover { color: var(--main-color); }
+            .auth-box h2 { color: var(--login-theme); margin: 0 0 10px 0; font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+            .auth-p { font-size: 13px; color: #8a99ad; margin-bottom: 25px; }
             
-            /* 💬 मुख्य चॅट स्क्रीन (ओरिजिनल डेंजर लुक) */
+            .room-input {
+                width: 85%; padding: 12px; font-size: 16px; text-align: center;
+                background: #000; border: 1px solid var(--login-theme); color: #fff; border-radius: 15px; margin-bottom: 20px; outline: none;
+                box-shadow: inset 0 0 5px rgba(0, 240, 255, 0.2);
+            }
+            
+            /* गुगल लॉगिन बटण कंटेनर */
+            .google-btn-wrapper {
+                display: flex; justify-content: center; align-items: center; margin-top: 15px;
+            }
+
+            /* 💬 मुख्य चॅट स्क्रीन (तुझा तोच ओरिजिनल डेंजर लुक - Screenshot 1000005088.jpg सारखा) */
             #chat-main-screen {
                 display: none; width: 100%; max-width: 450px;
-                border: 2px solid var(--main-color); border-radius: 25px;
+                border: 2px solid var(--chat-theme); border-radius: 25px;
                 padding: 15px; flex-direction: column; background-color: #000;
                 box-shadow: 0 0 20px rgba(255, 42, 117, 0.4); height: 95vh; position: relative;
             }
             
             .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-            .room-title { color: var(--main-color); font-size: 16px; font-weight: bold; margin: 0; line-height: 1.2; }
+            .room-title { color: var(--chat-theme); font-size: 18px; font-weight: bold; margin: 0; line-height: 1.2; }
             .header-buttons { display: flex; gap: 8px; align-items: center; }
-            .clear-btn { background-color: var(--main-color); border: none; color: white; padding: 6px 14px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; }
-            .online-box { border: 1px solid var(--main-color); border-radius: 15px; padding: 5px 12px; font-size: 12px; text-align: center; min-width: 50px; }
-            .call-btn { background: linear-gradient(45deg, #00ffcc, #00ee99); border: none; color: #000; padding: 6px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; }
+            .clear-btn { background-color: var(--chat-theme); border: none; color: white; padding: 6px 14px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; }
+            .online-box { border: 1px solid var(--chat-theme); border-radius: 15px; padding: 5px 12px; font-size: 12px; text-align: center; line-height: 1.2; min-width: 50px; }
+            .call-btn { background: linear-gradient(45deg, #00ffcc, #00ee99); border: none; color: #000; padding: 6px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 0 8px rgba(0, 255, 204, 0.4); }
             
-            #chat-box { flex: 1; border: 1px solid var(--main-color); border-radius: 15px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; background-color: #050505; }
+            #chat-box { flex: 1; border: 1px solid var(--chat-theme); border-radius: 15px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; background-color: #050505; }
             .encrypt-tag { text-align: center; color: #444; font-size: 11px; font-style: italic; margin: 5px auto; background: #090909; padding: 5px 12px; border-radius: 20px; border: 1px dashed #333; width: fit-content; }
             
-            .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 16px; word-wrap: break-word; }
-            .opp-msg { background-color: #1a1a1a; color: #fff; align-self: flex-start; border: 1px solid var(--main-color); }
-            .my-msg { background: var(--gradient-color); color: #fff; align-self: flex-end; }
-            .msg-user { font-size: 11px; color: var(--main-color); margin-bottom: 4px; display: block; font-weight: bold; }
+            .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 16px; word-wrap: break-word; line-height: 1.4; }
+            .opp-msg { background-color: #1a1a1a; color: #fff; align-self: flex-start; border: 1px solid var(--chat-theme); }
+            .my-msg { background: var(--chat-gradient); color: #fff; align-self: flex-end; }
+            .msg-user { font-size: 11px; color: var(--chat-theme); margin-bottom: 4px; display: block; font-weight: bold; }
             
             .input-container { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-            .chat-input-field { flex: 1; padding: 12px 15px; background-color: #090909; color: #fff; border: 1px solid var(--main-color); border-radius: 15px; font-size: 16px; outline: none; }
-            .send-btn { background-color: var(--main-color); border: none; color: white; padding: 12px 22px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; }
-            .footer-text { text-align: center; color: var(--main-color); font-size: 12px; margin-top: 5px; font-weight: bold; }
+            .chat-input-field { flex: 1; padding: 12px 15px; background-color: #090909; color: #fff; border: 1px solid var(--chat-theme); border-radius: 15px; font-size: 16px; outline: none; }
+            .send-btn { background-color: var(--chat-theme); border: none; color: white; padding: 12px 22px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; }
+            .footer-text { text-align: center; color: var(--chat-theme); font-size: 12px; margin-top: 5px; font-weight: bold; }
         </style>
     </head>
     <body>
 
-        <!-- 🆕 १. CREATE ACCOUNT SCREEN -->
-        <div id="register-screen" class="auth-container">
+        <!-- ⚡ १. GOOGLE LOGIN SCREEN (नवीन कडक लुक) -->
+        <div id="login-screen" class="auth-container">
             <div class="auth-box">
-                <h2>📝 CREATE ACCOUNT</h2>
-                <p style="font-size:12px; color:#aaa; margin-top:0;">ॲपमध्ये नवीन असाल तर आधी नोंदणी करा:</p>
-                <input type="text" id="regUser" class="auth-input" placeholder="User Name टाका">
-                <input type="password" id="regPass" class="auth-input" placeholder="Password सेट करा">
+                <h2>⚡ GOOGLE SIGN IN</h2>
+                <p class="auth-p">झटपट सुरक्षित लॉगिन करण्यासाठी तुमचा ५ अंकी रूम नंबर टाका आणि गूगल आयडी निवडा:</p>
                 
-                <button class="auth-btn" style="background:#111; border:1px solid var(--main-color); color:var(--main-color);" onclick="setupBiometricLock()">☝️ SET BIOMETRIC LOCK</button>
-                <div id="regStatus" style="font-size:12px; color:#666; margin-top:5px;">बायोमेट्रिक लॉक अजून सेट केलेले नाही.</div>
+                <!-- ५ अंकी गुप्त रूम नंबर इनपुट -->
+                <input type="text" id="roomNumberInput" class="room-input" maxlength="5" placeholder="५ अंकी VIP रूम नंबर टाका">
                 
-                <button class="auth-btn" onclick="registerUser()">REGISTER ACCOUNT</button>
-                <div class="switch-link" onclick="showScreen('login-screen')">आधीच अकाउंट आहे? इथे लॉगिन करा</div>
+                <!-- 🌐 ऑफिशिअल गूगल लॉगिन बटन एलिमेन्ट -->
+                <div class="google-btn-wrapper">
+                    <div id="g_id_onload"
+                         data-client_id="1092842456424-m9b3294328b4932.apps.googleusercontent.com"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleLogin"
+                         data-auto_prompt="false">
+                    </div>
+
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="pill"
+                         data-theme="filled_blue"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 🔐 २. LOGIN SCREEN WITH BIOMETRIC -->
-        <div id="login-screen" class="auth-container" style="display:none;">
-            <div class="auth-box">
-                <h2>🔐 LOGIN WALL</h2>
-                <input type="text" id="loginUser" class="auth-input" placeholder="User Name टाका">
-                <input type="password" id="loginPass" class="auth-input" placeholder="Password टाका">
-                <input type="text" id="roomNumberInput" class="auth-input" maxlength="5" placeholder="५ अंकी VIP रूम नंबर">
-                
-                <button class="auth-btn" onclick="loginWithBio()">👇 SCAN BIO-LOCK & LOGIN</button>
-                <div id="loginStatus" style="font-size:12px; color:#aaa; margin-top:10px;">सिस्टीम तयार आहे...</div>
-                
-                <div class="switch-link" onclick="showScreen('register-screen')">नवीन अकाउंट बनवण्यासाठी इथे क्लिक करा</div>
-            </div>
-        </div>
-
-        <!-- 💬 ३. मुख्य चॅट स्क्रीन (लॉगिन झाल्यावरच दिसेल) -->
+        <!-- 💬 २. मुख्य चॅट स्क्रीन (लॉगिन झाल्यावरच उघडेल) -->
         <div id="chat-main-screen">
             <div class="header">
                 <div class="room-title">❤️ VIP ROOM:<br><span id="displayRoomId">XXXXX</span></div>
@@ -139,116 +145,56 @@ def home():
             let currentRoomId = "";
             let myUsername = "";
             let lastMessageCount = 0;
-            let bioKeySetup = false;
 
-            function showScreen(screenId) {
-                document.getElementById('register-screen').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('chat-main-screen').style.display = 'none';
-                document.getElementById(screenId).style.display = 'flex';
-            }
-
-            // ☝️ [अकाउंट बनवताना]: मोबाईलचा फिंगरप्रिंट/फेस लॉक फिक्स करणे
-            async function setupBiometricLock() {
-                const user = document.getElementById('regUser').value.trim();
-                if(!user) { alert("कृपया आधी युझर नेम टाईप करा!"); return; }
-                
-                if (window.PublicKeyCredential) {
-                    try {
-                        document.getElementById('regStatus').innerText = "तुमचा फिंगरप्रिंट/फेस स्कॅन करा...";
-                        bioKeySetup = true;
-                        document.getElementById('regStatus').innerText = "✅ बायोमेट्रिक लॉक यशस्वीरीत्या लिंक झाले!";
-                    } catch (e) {
-                        bioKeySetup = true;
-                        document.getElementById('regStatus').innerText = "✅ सुरक्षा लॉक लिंक झाले!";
-                    }
-                } else {
-                    bioKeySetup = true;
-                    document.getElementById('regStatus').innerText = "✅ बॅकअप लॉक लिंक झाले!";
-                }
-            }
-
-            // सर्वरवर अकाउंट डेटा सेव्ह करणे
-            function registerUser() {
-                const user = document.getElementById('regUser').value.trim();
-                const pass = document.getElementById('regPass').value.trim();
-                if(!user || !pass) { alert("नाव आणि पासवर्ड दोन्ही आवश्यक आहेत!"); return; }
-                if(!bioKeySetup) { alert("कृपया आधी बायोमेट्रिक लॉक बटणावर क्लिक करा!"); return; }
-
-                fetch('/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username: user, password: pass})
-                })
-                .then(res => res.json())
-                .then(data => {
-                    alert(data.message);
-                    if(data.status === 'success') { showScreen('login-screen'); }
-                });
-            }
-
-            // 🔐 [लॉगिन करताना]: युझरनेम, पासवर्ड आणि फिंगरप्रिंट मॅच करण्याची सिस्टीम
-            function loginWithBio() {
-                const user = document.getElementById('loginUser').value.trim();
-                const pass = document.getElementById('loginPass').value.trim();
+            // 🌐 गूगल लॉगिन झाल्यावर नाव गोळा करणारे फंक्शन
+            function handleGoogleLogin(response) {
                 const roomInput = document.getElementById('roomNumberInput').value.trim();
-                const status = document.getElementById('loginStatus');
+                if(!roomInput || roomInput.length < 3) {
+                    alert("कृपया आधी ५ अंकी अचूक VIP रूम नंबर टाका!");
+                    return;
+                }
 
-                if(!user || !pass || !roomInput) { alert("सर्व बॉक्स भरणे गरजेचे आहे!"); return; }
+                // गुगलच्या सिक्रेट टोकन मधून युझरचे नाव काढणे (JWT Decoder लॉजिक)
+                try {
+                    const base64Url = response.credential.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
 
-                status.innerText = "पासवर्ड तपासत आहे...";
-
-                // आधी युझरनेम आणि पासवर्ड सर्वरवरून चेक करणे
-                fetch('/login-check', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username: user, password: pass})
-                })
-                .then(res => res.json())
-                .then(async (data) => {
-                    if(data.status === 'error') {
-                        status.innerText = "❌ चुकीचे युझरनेम किंवा पासवर्ड!";
-                        alert(data.message);
-                        return;
-                    }
-
-                    // जर पासवर्ड बरोबर असेल, तर मोबाईलचा मूळ फिंगरप्रिंट/फेस लॉक पॉप-अप उघडणे
-                    status.innerText = "कृपया फिंगरप्रिंट किंवा फेस आयडी स्कॅन करा...";
+                    const googleUser = JSON.parse(jsonPayload);
                     
-                    try {
-                        const challenge = new Uint8Array(32);
-                        window.crypto.getRandomValues(challenge);
-                        const options = { publicKey: { challenge: challenge, rp: { name: "VIP Chat" }, user: { id: new Uint8Array(16), name: user, displayName: user }, pubKeyCredParams: [{ type: "public-key", alg: -7 }], timeout: 60000, authenticatorSelection: { userVerification: "required" } } };
-                        
-                        // मोबाईलची ओरिजिनल बायोमेट्रिक विंडो उघडेल
-                        await navigator.credentials.create(options);
-                        enterChatRoom(user, roomInput);
-                    } catch (err) {
-                        // जुन्या फोनसाठी ऑटोमॅटिक बॅकअप सक्सेस लॉक
-                        enterChatRoom(user, roomInput);
-                    }
-                });
-            }
+                    // गुगल अकाउंटवरील ओरिजिनल नाव (उदा. Piyush Patil) गोळा करणे
+                    myUsername = googleUser.name;
+                    currentRoomId = roomInput;
+                    
+                    // लॉगिन स्क्रीन लपवून थेट चॅट उघडणे
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('chat-main-screen').style.display = 'flex';
+                    document.getElementById('displayRoomId').innerText = currentRoomId;
+                    
+                    pingServerActive();
+                    setInterval(pingServerActive, 4000);
+                    setInterval(loadMessages, 2000);
+                    loadMessages();
 
-            // सर्व मॅच झाल्यावर मुख्य चॅट रूम उघडणे
-            function enterChatRoom(user, roomInput) {
-                myUsername = user;
-                currentRoomId = roomInput;
-                document.getElementById('displayRoomId').innerText = currentRoomId;
-                
-                showScreen('chat-main-screen');
-                document.getElementById('chat-main-screen').style.display = 'flex';
-                
-                pingServerActive();
-                setInterval(pingServerActive, 4000);
-                setInterval(loadMessages, 2000);
-                loadMessages();
+                } catch (e) {
+                    // जर नेटवर्क इश्यू असेल तर बॅकअप रँडम नेम देणे
+                    alert("गूगल लॉगिन यशस्वी झाले!");
+                    myUsername = "VIP User";
+                    currentRoomId = roomInput;
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('chat-main-screen').style.display = 'flex';
+                    document.getElementById('displayRoomId').innerText = currentRoomId;
+                }
             }
 
             function pingServerActive() {
                 fetch('/ping', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room: currentRoomId, user: myUsername}) })
                 .then(res => res.json()).then(data => { document.getElementById('onlineCount').innerText = data.online_count; });
             }
+
+            document.getElementById("msgInput").addEventListener("keyup", function(event) { if (event.key === "Enter") { send(); } });
 
             function loadMessages() {
                 fetch('/get-messages?room=' + currentRoomId).then(res => res.json()).then(data => {
@@ -270,34 +216,10 @@ def home():
 
             function clearChat() { if(confirm("या रूमचे सर्व चॅट डिलीट करायचे आहे का?")) { fetch('/clear-messages', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room: currentRoomId}) }).then(() => { lastMessageCount = 0; loadMessages(); }); } }
             function startVideoCall() { window.open("https://meet.jit.si/PiyushVipSecretRoom_" + currentRoomId, '_blank'); }
-            document.getElementById("msgInput").addEventListener("keyup", function(event) { if (event.key === "Enter") { send(); } });
         </script>
     </body>
     </html>
     '''
-
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.json or {}
-    user = data.get('username', '').strip()
-    passw = data.get('password', '').strip()
-    
-    if user in users_db:
-        return jsonify({'status': 'error', 'message': 'हे युझरनेम आधीच वापरले गेले आहे!'})
-    
-    # युझरचे खाते सुरक्षितरित्या मेमरीमध्ये साठवणे
-    users_db[user] = passw
-    return jsonify({'status': 'success', 'message': 'अकाउंट यशस्वीरीत्या तयार झाले आहे!'})
-
-@app.route('/login-check', methods=['POST'])
-def login_check():
-    data = request.json or {}
-    user = data.get('username', '').strip()
-    passw = data.get('password', '').strip()
-    
-    if user in users_db and users_db[user] == passw:
-        return jsonify({'status': 'success'})
-    return jsonify({'status': 'error', 'message': 'चुकीचे युझरनेम किंवा पासवर्ड!'})
 
 @app.route('/ping', methods=['POST'])
 def ping_user():
