@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopX Pro - Creator Edition</title>
+  <title>PopX Pro - Creator Edition Fixed</title>
   <style>
     :root { --bg: #000; --text: #fff; --accent: #0095f6; --card: #121212; --border: #262626; }
     body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; user-select: none; overflow: hidden; }
@@ -33,7 +33,7 @@
     .post-actions { padding: 10px 15px 5px 15px; display: flex; gap: 15px; font-size: 22px; }
     .blue-tick { color: #0095f6; font-size: 14px; margin-left: 3px; display: inline; }
     
-    /* Reels System (Instagram Snap Style) */
+    /* Reels System */
     .reels-feed { height: calc(100vh - 60px); overflow-y: scroll; scroll-snap-type: y mandatory; background: #000; }
     .reel-card { height: calc(100vh - 60px); width: 100%; scroll-snap-align: start; position: relative; background: #000; }
     .reel-video { width: 100%; height: 100%; object-fit: cover; }
@@ -64,10 +64,10 @@
     </div>
     <div id="live-feed">
       <div class="post-card">
-        <div class="post-header"><div class="post-avatar">👤</div><div>@piyush_creator <span class="blue-tick" id="tick-piyush_creator">🔵</span></div></div>
+        <div class="post-header"><div class="post-avatar">👤</div><div>@piyush_creator <span class="blue-tick">🔵</span></div></div>
         <img class="post-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500">
         <div class="post-actions"><span style="cursor:pointer;" onclick="this.innerText = this.innerText === '❤️' ? '🤍' : '❤️'">❤️</span></div>
-        <div style="padding: 0 15px; font-size: 14px;"><b>@piyush_creator</b> Master Edition Setup Live! 🎬🚀</div>
+        <div style="padding: 0 15px; font-size: 14px;"><b>@piyush_creator 🔵</b> Master Edition Live! 🎬🚀</div>
       </div>
     </div>
   </div>
@@ -75,7 +75,6 @@
   <!-- २. स्क्रोलिंग रील्स पेज -->
   <div id="reels-page" class="page" style="padding-bottom: 0;">
     <div class="reels-feed" id="reelsContainer">
-      <!-- डीफॉल्ट रील -->
       <div class="reel-card">
         <video class="reel-video" src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-light-40492-large.mp4" loop muted autoplay onclick="this.paused ? this.play() : this.pause()"></video>
         <div class="reel-overlay"><p>@piyush_creator <span class="blue-tick">🔵</span></p><span>Official PopX Reels Track! 🎬🔥</span></div>
@@ -83,7 +82,7 @@
     </div>
   </div>
 
-  <!-- ३. पोस्ट आणि रील अपलोड पेज -->
+  <!-- ३. पोस्ट आणि रील अपलोड पेज (FITTED) -->
   <div id="upload-page" class="page">
     <div class="header"><div class="logo">Create</div></div>
     <div style="padding: 20px; text-align: center;">
@@ -105,7 +104,6 @@
   <!-- ४. प्रोफाईल पेज -->
   <div id="profile-page" class="page">
     <div class="profile-info">
-      <!-- ⚠️ गुपित ट्रिक: या अवतार फोटोवर ३ वेळा क्लिक केल्यास कोणालाही ब्लू टिक देता येईल! -->
       <div class="profile-avatar" onclick="triggerAdminPanel()">👤</div>
       <h3 id="profileName">Piyush Patil <span class="blue-tick">🔵</span></h3>
       <p style="color:#888; font-size:14px;">App Developer & Admin</p>
@@ -113,7 +111,7 @@
     <div class="grid" id="profile-grid"></div>
   </div>
 
-  <!-- बॉटम नेव्हिगेशन -->
+  <!-- बॉटम नेव्हिगेशन बार -->
   <div class="bottom-nav">
     <div class="nav-btn" onclick="openPage('home-page')">🏠</div>
     <div class="nav-btn" onclick="openPage('reels-page')">🎬</div>
@@ -130,7 +128,6 @@
       document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
       document.getElementById(id).style.display = 'block';
       
-      // रील्स पेज सोडून इतर कुठेही गेल्यास रील व्हिडिओ बंद करणे
       document.querySelectorAll('video').forEach(v => v.pause());
       if(id === 'reels-page') {
         const firstVideo = document.querySelector('#reelsContainer video');
@@ -163,21 +160,18 @@
       const caption = document.getElementById('postCaption').value || "No caption";
 
       if(currentUploadType === 'post') {
-        // होम फीडमध्ये पोस्ट जाणे
         const feed = document.getElementById('live-feed');
         const card = document.createElement('div');
         card.className = 'post-card';
         card.innerHTML = `<div class="post-header"><div class="post-avatar">👤</div><div>@Piyush_Patil <span class="blue-tick">🔵</span></div></div><img class="post-img" src="${selectedMediaBase64}"><div class="post-actions"><span style="cursor:pointer;" onclick="this.innerText=this.innerText==='❤️'?'🤍':'❤️'">❤️</span></div><div style="padding:0 15px;"><b>@Piyush_Patil 🔵</b> ${caption}</div>`;
         feed.insertBefore(card, feed.firstChild);
 
-        // प्रोफाईल ग्रिडमध्ये फोटो सिंक होणे
         const grid = document.getElementById('profile-grid');
         const item = document.createElement('div');
         item.className = 'grid-item';
         item.style.backgroundImage = `url('${selectedMediaBase64}')`;
         grid.insertBefore(item, grid.firstChild);
       } else {
-        // रील्स कंटेनरमध्ये नवीन रील व्हिडिओ जाणे 🎬
         const reelsFeed = document.getElementById('reelsContainer');
         const reelCard = document.createElement('div');
         reelCard.className = 'reel-card';
@@ -205,7 +199,6 @@
       }
     }
 
-    // 🔵 SECRET ADMIN PANEL FOR BLUE TICK CONTROL
     function triggerAdminPanel() {
       clickCount++;
       if(clickCount === 3) {
@@ -213,13 +206,12 @@
         const username = prompt("Enter the username to give Verified Blue Tick (🔵):");
         if(username) {
           alert(`Success! @${username} is now verified 🔵`);
-          // प्रोफाईलचं नाव असेल तर तिथे निळी टिक लावा
           if(username.toLowerCase() === 'piyush patil' || username.toLowerCase() === 'piyush') {
             document.getElementById('profileName').innerHTML = `${username} <span class="blue-tick">🔵</span>`;
           }
         }
       }
-      setTimeout(() => { clickCount = 0; }, 3000); // Reset clicks after 3s
+      setTimeout(() => { clickCount = 0; }, 3000);
     }
   </script>
 </body>
