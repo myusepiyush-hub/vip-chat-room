@@ -3,137 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopX Pro - Direct Access</title>
+  <title>PopX Pro - Master Edition</title>
   <style>
     :root { --bg: #000; --text: #fff; --accent: #0095f6; --card: #121212; --border: #262626; }
     body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; user-select: none; }
-    .page { height: calc(100vh - 110px); overflow-y: auto; padding-bottom: 20px; box-sizing: border-box; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #000; height: 50px; box-sizing: border-box; position: sticky; top: 0; z-index: 2000; }
-    .logo { font-weight: bold; font-size: 24px; font-style: italic; background: linear-gradient(45deg, #f09433, #dc2743); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page { height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 20px; box-sizing: border-box; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #000; position: sticky; top: 0; z-index: 2000; }
+    .logo { font-weight: bold; font-size: 26px; font-style: italic; background: linear-gradient(45deg, #f09433, #dc2743); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; font-size: 24px; z-index: 2000; height: 60px; box-sizing: border-box; }
-    .nav-btn { cursor: pointer; padding: 0 10px; transition: transform 0.2s; }
-    .nav-btn:active { transform: scale(0.8); }
-    .stories-bar { display: flex; gap: 12px; padding: 12px; overflow-x: auto; border-bottom: 1px solid #1c1c1e; }
-    .story-ring { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #dc2743; padding: 2px; flex-shrink: 0; }
-    .story-user { width: 100%; height: 100%; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+    .nav-btn { cursor: pointer; }
+    .stories-bar { display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid #1c1c1e; align-items: center; }
+    .story-ring { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #dc2743; padding: 2px; flex-shrink: 0; cursor: pointer; position: relative; }
+    .story-user { width: 100%; height: 100%; border-radius: 50%; background: #262626; display: flex; justify-content: center; align-items: center; font-size: 22px; background-size: cover; background-position: center; }
     .post-card { padding: 15px 0; border-bottom: 1px solid #1c1c1e; }
     .post-header { display: flex; align-items: center; padding: 0 15px 10px 15px; font-weight: bold; font-size: 14px; }
-    .post-avatar { width: 32px; height: 32px; border-radius: 50%; background: #262626; margin-right: 10px; display: flex; justify-content: center; align-items: center; }
     .post-img { width: 100%; background: #111; display: block; object-fit: contain; max-height: 450px; }
-    .post-actions { padding: 10px 15px 5px 15px; display: flex; gap: 15px; font-size: 22px; }
-    .profile-info { padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
-    .profile-avatar { width: 86px; height: 86px; border-radius: 50%; background: #262626; margin: 0 auto 12px auto; font-size: 38px; display: flex; justify-content: center; align-items: center; border: 2px solid #333; }
+    .post-actions { padding: 10px 15px 5px 15px; display: flex; gap: 15px; font-size: 24px; }
+    .blue-tick { color: #0095f6; font-size: 14px; margin-left: 3px; }
+    .comment-box { background: #121212; padding: 10px; margin: 10px 15px; border-radius: 8px; display: none; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; }
-    .grid-item { aspect-ratio: 1/1; background-color: #1c1c1e; background-size: cover; background-position: center; border-radius: 4px; }
-    .upload-box { width: 85%; border: 2px dashed #333; padding: 40px 10px; border-radius: 12px; margin: 20px auto; cursor: pointer; background: #0a0a0a; text-align: center; }
+    .grid-item { aspect-ratio: 1/1; background-color: #1c1c1e; background-size: cover; background-position: center; }
     .btn-follow { background: #0095f6; border: none; color: white; padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .reels-video { width: 100%; height: 100vh; object-fit: cover; }
   </style>
 </head>
 <body>
 
-  <!-- मुख्य ॲप स्क्रीन (आता डायरेक्ट ओपन होणार) -->
-  <div id="main-app-screen">
-    <div class="header">
-      <div class="logo">PopX Pro</div>
-      <div style="font-size:14px; color:#888; font-weight:bold;">Beta Version ⚙️</div>
-    </div>
-
-    <!-- होम पेज -->
-    <div id="home-page" class="page" style="display: block;">
-      <div class="stories-bar">
-        <div class="story-ring"><div class="story-user">🙋‍♂️</div></div>
-        <div class="story-ring"><div class="story-user">🐱</div></div>
-        <div class="story-ring"><div class="story-user">🔥</div></div>
+  <div id="home-page" class="page">
+    <div class="header"><div class="logo">PopX Pro</div></div>
+    <div class="stories-bar">
+      <div class="story-ring" onclick="document.getElementById('storyInput').click()">
+        <div class="story-user" id="myStoryIcon">🙋‍♂️</div>
       </div>
-      
-      <!-- हे डेमो पोस्ट्स जे बटण दाबताच दिसतील -->
-      <div id="live-feed">
-        <div class="post-card">
-          <div class="post-header">
-            <div class="post-avatar">👤</div>
-            <div style="flex:1">@piyush_creator ✓</div>
-            <button class="btn-follow" onclick="this.innerText='Following'; this.style.background='#333';">Follow</button>
-          </div>
-          <img class="post-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500">
-          <div class="post-actions"><span style="cursor:pointer;" onclick="alert('Liked ❤️')">❤️</span></div>
-          <div class="post-details"><b>@piyush_creator</b> Welcome to PopX Pro App! 🚀</div>
-        </div>
+      <input type="file" id="storyInput" style="display:none;" onchange="updateStory(this)">
+      <div class="story-ring"><div class="story-user">🐱</div></div>
+    </div>
+    <div id="feed">
+      <div class="post-card">
+        <div class="post-header">👤 @piyush_creator <span class="blue-tick">🔵</span></div>
+        <img class="post-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500">
+        <div class="post-actions"><span onclick="toggleLike(this)">❤️</span> <span onclick="alert('Comments...')">💬</span></div>
+        <div style="padding: 0 15px; font-size: 14px;"><b>@piyush_creator</b> Master Edition Live! 🚀</div>
       </div>
-    </div>
-
-    <!-- सर्च पेज -->
-    <div id="search-page" class="page" style="display: none;">
-      <div style="padding:15px;"><input type="text" placeholder="Search accounts..." style="width:100%; padding:12px; border-radius:8px; border:none; background:#1c1c1e; color:#fff; font-size:14px;"></div>
-      <div class="grid" id="explore-grid"></div>
-    </div>
-
-    <!-- अपलोड पेज -->
-    <div id="upload-page" class="page" style="display: none;">
-      <div style="padding:20px; text-align:center;">
-        <h3>Create Live Post</h3>
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-          <span style="font-size:45px;">🖼️</span>
-          <p id="uploadStatusText" style="margin:10px 0 0 0; color:#888; font-weight:bold;">Click to Open Gallery</p>
-        </div>
-        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="imageSelected(this)">
-        <input type="text" id="postCaption" placeholder="Write a caption..." style="width:85%; padding:14px; margin-bottom:25px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; font-size:14px;"><br>
-        <button onclick="uploadPostLocal()" style="padding:14px 35px; background:#0095f6; border:none; color:white; border-radius:8px; font-weight:bold; cursor:pointer; width:85%; font-size:15px;">Publish Post 🚀</button>
-      </div>
-    </div>
-
-    <!-- प्रोफाईल पेज -->
-    <div id="profile-page" class="page" style="display: none;">
-      <div class="profile-info">
-        <div class="profile-avatar">👤</div>
-        <h3 style="margin:5px 0; font-size:20px;">Piyush Patil ✓</h3>
-        <p style="color:#888; margin:5px 0 15px 0; font-size:14px;">App Developer | Direct Mode Active</p>
-      </div>
-      <div class="grid" id="profile-grid"></div>
-    </div>
-
-    <!-- बॉटम नेव्हिगेशन -->
-    <div class="bottom-nav">
-      <div class="nav-btn" onclick="openPage('home')">🏠</div>
-      <div class="nav-btn" onclick="openPage('search')">🔍</div>
-      <div class="nav-btn" onclick="openPage('upload')">➕</div>
-      <div class="nav-btn" onclick="openPage('profile')">👤</div>
     </div>
   </div>
 
+  <div id="reels-page" class="page" style="display:none; padding:0;">
+    <video class="reels-video" src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-light-40492-large.mp4" autoplay loop muted></video>
+  </div>
+
+  <div id="profile-page" class="page" style="display:none;">
+    <div style="text-align:center; padding:20px;">
+      <div class="story-user" style="width:90px; height:90px; margin:auto; margin-bottom:10px; border:2px solid #333;">👤</div>
+      <h3>Piyush Patil <span class="blue-tick">🔵</span></h3>
+    </div>
+    <div class="grid" id="profile-grid"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-btn" onclick="showPage('home-page')">🏠</div>
+    <div class="nav-btn" onclick="showPage('reels-page')">🎬</div>
+    <div class="nav-btn" onclick="alert('Upload from Post button')">➕</div>
+    <div class="nav-btn" onclick="showPage('profile-page')">👤</div>
+  </div>
+
   <script>
-    let selectedImageFile = null;
-
-    function openPage(id) { 
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); 
-      document.getElementById(id + '-page').style.display = 'block'; 
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
     }
-
-    function imageSelected(input) { 
-      if(input.files && input.files[0]) { 
-        selectedImageFile = input.files[0]; 
-        document.getElementById('uploadStatusText').innerText = "✓ Photo Selected"; 
-        document.getElementById('uploadStatusText').style.color = "#0095f6"; 
-      } 
+    function updateStory(input) {
+      const reader = new FileReader();
+      reader.onload = e => document.getElementById('myStoryIcon').style.backgroundImage = `url('${e.target.result}')`;
+      reader.readAsDataURL(input.files[0]);
     }
-
-    function uploadPostLocal() { 
-      if (!selectedImageFile) return alert("Please select an image first!");
-      alert("Post Published Successfully! 🚀"); 
-      document.getElementById('fileInput').value = "";
-      document.getElementById('postCaption').value = "";
-      document.getElementById('uploadStatusText').innerText = "Click to Open Gallery";
-      document.getElementById('uploadStatusText').style.color = "#888";
-      selectedImageFile = null;
-      openPage('home'); 
-    }
-
-    // एक्सप्लोर ग्रिडसाठी डेमो आइटम्स
-    for(let i=0; i<9; i++) { 
-      const d = document.createElement('div'); 
-      d.className = 'grid-item'; 
-      d.style.backgroundColor = '#1c1c1e';
-      document.getElementById('explore-grid').appendChild(d); 
-    }
+    function toggleLike(el) { el.style.color = el.style.color === 'red' ? 'white' : 'red'; }
   </script>
 </body>
 </html>
