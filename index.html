@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopX Pro - Absolute Ecosystem Ultimate</title>
+  <title>PopX Pro - Ultimate Hyper-Ecosystem V8</title>
   <style>
     :root { --bg: #000; --text: #fff; --accent: #0095f6; --card: #121212; --border: #262626; --ig-gray: #a8a8a8; --neon-cyan: #00f2fe; --neon-glow: none; }
     .neon-theme { --bg: #0a0f1d; --card: #131c33; --border: #00f2fe; --accent: #ff007f; --neon-glow: 0 0 10px #00f2fe; }
@@ -11,6 +11,15 @@
     *, *::before, *::after { box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; user-select: none; overflow: hidden; transition: all 0.3s ease; }
     
+    /* Login / Register Screen Styles */
+    #auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 30px; background: #000; z-index: 5000; position: relative; }
+    .auth-card { width: 100%; max-width: 350px; text-align: center; }
+    .auth-input { width: 100%; background: #1c1c1e; border: 1px solid #333; color: white; padding: 14px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; outline: none; }
+    .auth-btn { width: 100%; background: #0095f6; border: none; color: white; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+    .auth-btn:active { background: #0077c2; }
+
+    /* Main App Framework */
+    #main-app-framework { display: none; }
     .page { height: calc(100vh - 60px); overflow-y: auto; box-sizing: border-box; display: none; }
     #home-page { display: block; }
     
@@ -131,203 +140,282 @@
 </head>
 <body>
 
-  <!-- Background Music and Video Controller Elements -->
-  <audio id="profileAnthemPlayer" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
-  <div class="backdrop" id="modalBackdrop" onclick="closeEditProfile()"></div>
-
-  <!-- STORIES FULL SCREEN VIEW -->
-  <div class="story-viewer" id="storyViewerZone" onclick="closeStoryView()">
-    <div class="story-progress"><div class="story-progress-bar" id="storyProgBar"></div></div>
-    <img id="storyViewerImg" src="">
-  </div>
-
-  <!-- ================= १. होम फीड पेज ================= -->
-  <div id="home-page" class="page">
-    <div class="header">
-      <div class="logo">PopX Pro</div>
-      <div class="header-icons">
-        <span style="font-size:15px; background:#1c1c1e; padding:5px 10px; border-radius:15px; color:gold;">💎 125</span>
-        <span onclick="openPage('dm-page')">📨</span>
-      </div>
-    </div>
-    <div class="stories-bar">
-      <div class="story-ring" id="myStoryRing" onclick="playLiveStory()"><div class="story-user" id="myStoryIcon">🙋‍♂️</div></div>
-      <div class="story-ring" style="border: none;" onclick="document.getElementById('storyFileInput').click()"><div class="story-user" style="background:#262626; font-size:24px;">+</div></div>
-      <input type="file" id="storyFileInput" accept="image/*" style="display:none;" onchange="uploadStoryLocal(this)">
-    </div>
-    <div id="live-feed">
-      <p style="text-align:center; color:#888; padding:40px; font-size:14px;">No posts yet. Go to + tab to publish!</p>
-    </div>
-  </div>
-
-  <!-- ================= 🔎 २. एक्सप्लोर मॅगझिन ग्रिड ================= -->
-  <div id="explore-page" class="page">
-    <div class="header"><input type="text" placeholder="🔎 Global Trending Search..." style="width:100%; background:#1c1c1e; border:1px solid #333; color:white; padding:10px; border-radius:8px;"></div>
-    <div class="explore-grid-premium">
-      <div class="exp-item tall" style="background-image:url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=250')"></div>
-      <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=250')"></div>
-      <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1511512578047-dfb367046420?w=250')"></div>
-      <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=250')"></div>
-      <div class="exp-item tall" style="background-image:url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=250')"></div>
-      <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=250')"></div>
-    </div>
-  </div>
-
-  <!-- ================= 🎬 ३. स्क्रोलिंग रील्स इंजिन ================= -->
-  <div id="reels-page" class="page" style="padding-bottom: 0;">
-    <div class="reels-feed" id="reelsContainer">
-      <div class="reel-card" id="defaultReelCard">
-        <p style="text-align:center; color:#888; padding-top:200px;">No Reels Video yet. Upload from + button!</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= ➕ ४. स्टुडिओ कोर (Upload Manager) ================= -->
-  <div id="upload-page" class="page">
-    <div class="header"><div class="logo" style="font-size:20px;">Studio Core</div></div>
-    <div style="padding: 15px; text-align: center;">
-      <div class="upload-choice">
-        <button class="choice-btn active" id="typePostBtn" onclick="setUploadType('post')">Feed Post 🖼️</button>
-        <button class="choice-btn" id="typeReelBtn" onclick="setUploadType('reel')">Reel Video 🎬</button>
-      </div>
-      <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-        <span id="uploadIcon" style="font-size:35px;">🖼️</span>
-        <p id="uploadStatusText" style="margin:5px; color:#888; font-weight:bold;">Open Studio Gallery</p>
-      </div>
-      <input type="file" id="fileInput" multiple style="display:none;" onchange="mediaSelected(this)">
+  <!-- ================= ⚠️ 0. LOGIN / CREATE ACCOUNT SCREEN ================= -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <h1 style="font-weight: bold; font-size: 38px; font-style: italic; background: linear-gradient(45deg, #f09433, #dc2743, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;">PopX Pro</h1>
+      <p style="color: #a8a8a8; font-size: 14px; margin-bottom: 30px;">Create Account or Login to Stream Node</p>
       
-      <!-- AI Caption Integration -->
-      <div style="display:flex; justify-content:center; align-items:center; width:85%; margin:0 auto 10px auto;">
-        <input type="text" id="postCaption" placeholder="Write description / Part No..." style="flex:1; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px;">
-        <button class="ai-btn" onclick="triggerAICaption()">🤖 Ask AI</button>
-      </div>
-      <input type="text" id="postLocation" placeholder="📍 Add Location (Mumbai, India...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
-      <input type="text" id="postMusic" placeholder="🎵 Add Music Name (Naseeb Ka King...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
+      <input type="text" id="authUsernameInput" class="auth-input" placeholder="Username / ID">
+      <input type="password" id="authPasswordInput" class="auth-input" placeholder="Password">
       
-      <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:15px;">
-        <input type="checkbox" id="lockPostToggle" style="width:18px; height:18px; cursor:pointer;">
-        <label for="lockPostToggle" style="color:gold; font-weight:bold; font-size:13px; cursor:pointer;">🎟️ Lock in VIP Vault (Subscription Room)</label>
-      </div>
-      
-      <button onclick="publishMedia()" style="padding:14px; background:#0095f6; border:none; color:white; border-radius:8px; font-weight:bold; width:85%;">Broadcast Live 🚀</button>
+      <button class="auth-btn" onclick="handleSecureAuthEngine()">Login / Create Account 🚀</button>
+      <p style="color: #555; font-size: 11px; margin-top: 20px;">Session secured with localStorage engine.</p>
     </div>
   </div>
 
-  <!-- ================= 📨 ५. डीएम व्हॉईस चेंजर मॅट्रिक्स ================= -->
-  <div id="dm-page" class="page">
-    <div class="header"><div class="profile-top-bar" onclick="openPage('home-page')">⬅️ Voice Changer DM</div></div>
-    <div class="dm-chat-box">
-      <div>
-        <div class="voice-changer-bar">
-          <button class="voice-btn active" id="vNormal" onclick="setVoiceMode('Normal')">Normal</button>
-          <button class="voice-btn" id="vRobot" onclick="setVoiceMode('Robot')">Robot 🤖</button>
-          <button class="voice-btn" id="vHorror" onclick="setVoiceMode('Horror')">Horror 👻</button>
-        </div>
-        <div id="chatMessages" style="padding:15px; font-size:14px; text-align:left; color:#aaa;">Select voice tone filter and type...</div>
-      </div>
-      <div style="display:flex; gap:10px; padding:10px 0;">
-        <input type="text" id="dmInput" placeholder="Type secret encrypted note..." style="flex:1; background:#1c1c1e; border:1px solid #333; color:white; padding:12px; border-radius:8px;">
-        <button onclick="sendVoiceDM()" style="background:var(--accent); border:none; color:white; padding:0 20px; border-radius:8px; font-weight:bold;">Send</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ================= 👤 ६. खऱ्या इंस्टाग्राम प्रोफाईलचे हुबेहूब पेज ================= -->
-  <div id="profile-page" class="page">
-    <div class="header">
-      <!-- 🔵 ADMIN BLUE TICK: या गियर आयकॉनवर ३ वेळा क्लिक केल्यास निळी टिक व्हेरिफाय होते! -->
-      <div class="profile-top-bar" onclick="triggerAdminPanel()">⚙️ <span id="topUsernameLabel">viralaaba</span> <span id="profileGlobalTick"></span> 🔽</div>
-      <div style="font-size:15px; cursor:pointer; color:var(--neon-cyan); font-weight:bold;" onclick="toggleNeonAuraTheme()">🌓 Neon Mode</div>
+  <!-- ================= MAIN PLATFORM FRAMEWORK ================= -->
+  <div id="main-app-framework">
+
+    <!-- Background Music and Video Controller Elements -->
+    <audio id="profileAnthemPlayer" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    <div class="backdrop" id="modalBackdrop" onclick="closeEditProfile()"></div>
+
+    <!-- STORIES FULL SCREEN VIEW -->
+    <div class="story-viewer" id="storyViewerZone" onclick="closeStoryView()">
+      <div class="story-progress"><div class="story-progress-bar" id="storyProgBar"></div></div>
+      <img id="storyViewerImg" src="">
     </div>
 
-    <div class="profile-header-container">
-      <div class="profile-main-row">
-        <div class="p-avatar-zone" id="profileMainAvatar" onclick="alert('Upload from + inside stories bar!')">👤</div>
-        <div class="profile-stats-zone">
-          <div class="stat-box"><span class="stat-num" id="postCountLabel">0</span><span class="stat-label">posts</span></div>
-          <div class="stat-box"><span class="stat-num" id="followerCountLabel">148K</span><span class="stat-label">followers</span></div>
-          <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">following</span></div>
+    <!-- ================= १. होम फीड पेज ================= -->
+    <div id="home-page" class="page">
+      <div class="header">
+        <div class="logo">PopX Pro</div>
+        <div class="header-icons">
+          <span style="font-size:15px; background:#1c1c1e; padding:5px 10px; border-radius:15px; color:gold;">💎 125</span>
+          <span onclick="openPage('dm-page')">📨</span>
         </div>
       </div>
-
-      <!-- बायो डेटा -->
-      <div class="bio-text">
-        <strong id="displayProfileName">N/TV</strong><br>
-        <span id="displayBioLines">Ek minute ka break?<br>viralaaba dekh!😲<br>📩 For Paid Promotion & Collaboration Contact:viralaabaa@gmail.com</span>
+      <div class="stories-bar">
+        <div class="story-ring" id="myStoryRing" onclick="playLiveStory()"><div class="story-user" id="myStoryIcon">🙋‍♂️</div></div>
+        <div class="story-ring" style="border: none;" onclick="document.getElementById('storyFileInput').click()"><div class="story-user" style="background:#262626; font-size:24px;">+</div></div>
+        <input type="file" id="storyFileInput" accept="image/*" style="display:none;" onchange="uploadStoryLocal(this)">
       </div>
-
-      <!-- 🎵 PROFILE ANTHEM WIDGET BAR -->
-      <div class="anthem-status-widget" id="anthemWidgetBlock" style="display:none;">
-        <div class="music-wave-bar" style="animation-delay: 0.1s;"></div>
-        <div class="music-wave-bar" style="animation-delay: 0.3s;"></div>
-        <div class="music-wave-bar" style="animation-delay: 0.5s;"></div>
-        <span>🎵 Profile Anthem Playing...</span>
-      </div>
-
-      <!-- LIVE MOOD WIDGET -->
-      <div class="mood-widget" onclick="changeLiveMoodWidget()">
-        <span>🎧 Status:</span> <strong id="moodStatusLabel">Editing Naseeb Ka King Part 5 🔥</strong>
-      </div>
-
-      <!-- प्रोफेशनल डॅशबोर्ड -->
-      <div class="dashboard-box">
-        <h4>Professional dashboard</h4>
-        <p>64.3M views in the last 30 days.</p>
-      </div>
-
-      <!-- ॲक्शन बटन्स -->
-      <div class="action-btn-row">
-        <button class="ig-btn follow-btn-active" id="mainFollowBtn" onclick="toggleLiveFollower()">Follow</button>
-        <button class="ig-btn" onclick="openEditProfile()">Edit profile</button>
-        <button class="ig-btn" onclick="alert('Profile Link Shared!')">Share profile</button>
+      <div id="live-feed">
+        <p style="text-align:center; color:#888; padding:40px; font-size:14px;">No posts yet. Go to + tab to publish!</p>
       </div>
     </div>
 
-    <!-- ग्रिड फोल्डर स्विचेस -->
-    <div class="tab-icon-row">
-      <div class="active" id="tPosts" onclick="switchProfileTab('posts')">⌗ Grid</div>
-      <div id="tSaved" onclick="switchProfileTab('saved')">🔖 Bookmark</div>
-      <div id="tVIP" onclick="switchProfileTab('vip')" style="color:gold; font-weight:bold;">🎟️ VIP Vault</div>
+    <!-- ================= 🔎 २. एक्सप्लोर मॅगझिन ग्रिड ================= -->
+    <div id="explore-page" class="page">
+      <div class="header"><input type="text" placeholder="🔎 Global Trending Search..." style="width:100%; background:#1c1c1e; border:1px solid #333; color:white; padding:10px; border-radius:8px;"></div>
+      <div class="explore-grid-premium">
+        <div class="exp-item tall" style="background-image:url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=250')"></div>
+        <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=250')"></div>
+        <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1511512578047-dfb367046420?w=250')"></div>
+        <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=250')"></div>
+        <div class="exp-item tall" style="background-image:url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=250')"></div>
+        <div class="exp-item" style="background-image:url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=250')"></div>
+      </div>
     </div>
 
-    <!-- ३x३ मीडिया ग्रिड्स -->
-    <div class="ig-grid" id="profile-grid-ig"></div>
-    <div class="ig-grid" id="saved-grid-ig" style="display:none;"></div>
-    <div class="ig-grid" id="vip-grid-ig" style="display:none;"></div>
-  </div>
-
-  <!-- ================= 🛠️ EDIT PROFILE OVERLAY MODAL ================= -->
-  <div class="edit-modal" id="editProfileModal">
-    <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-weight:bold;">
-      <span style="color:#ff4444; cursor:pointer;" onclick="closeEditProfile()">Cancel</span>
-      <span>Modify Profile Data</span>
-      <span style="color:var(--accent); cursor:pointer;" onclick="saveProfileData()">Done</span>
+    <!-- ================= 🎬 ३. स्क्रोलिंग रील्स इंजिन ================= -->
+    <div id="reels-page" class="page" style="padding-bottom: 0;">
+      <div class="reels-feed" id="reelsContainer">
+        <div class="reel-card" id="defaultReelCard">
+          <p style="text-align:center; color:#888; padding-top:200px;">No Reels Video yet. Upload from + button!</p>
+        </div>
+      </div>
     </div>
-    <div class="input-group"><label>Username ID</label><input type="text" id="inputUsername" value="viralaaba"></div>
-    <div class="input-group"><label>Display Name</label><input type="text" id="inputProfileName" value="N/TV"></div>
-    <div class="input-group"><label>Bio Grid Lines</label><textarea id="inputBio" rows="3">Ek minute ka break?&#10;viralaaba dekh!😲&#10;📩 For Paid Promotion & Collaboration Contact:viralaabaa@gmail.com</textarea></div>
-  </div>
 
-  <!-- बॉटम नेव्हिगेशन बार -->
-  <div class="bottom-nav">
-    <div class="nav-btn" onclick="openPage('home-page'); handleAnthemStop();">🏠</div>
-    <div class="nav-btn" onclick="openPage('explore-page'); handleAnthemStop();">🔍</div>
-    <div class="nav-btn" onclick="openPage('reels-page'); handleAnthemStop();">🎬</div>
-    <div class="nav-btn" onclick="openPage('upload-page'); handleAnthemStop();">➕</div>
-    <div class="nav-btn" onclick="openPage('profile-page'); handleAnthemStart();">👤</div>
+    <!-- ================= ➕ ४. स्टुडिओ कोर (Upload Manager) ================= -->
+    <div id="upload-page" class="page">
+      <div class="header"><div class="logo" style="font-size:20px;">Studio Core</div></div>
+      <div style="padding: 15px; text-align: center;">
+        <div class="upload-choice">
+          <button class="choice-btn active" id="typePostBtn" onclick="setUploadType('post')">Feed Post 🖼️</button>
+          <button class="choice-btn" id="typeReelBtn" onclick="setUploadType('reel')">Reel Video 🎬</button>
+        </div>
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+          <span id="uploadIcon" style="font-size:35px;">🖼️</span>
+          <p id="uploadStatusText" style="margin:5px; color:#888; font-weight:bold;">Open Studio Gallery</p>
+        </div>
+        <input type="file" id="fileInput" multiple style="display:none;" onchange="mediaSelected(this)">
+        
+        <!-- AI Caption Integration -->
+        <div style="display:flex; justify-content:center; align-items:center; width:85%; margin:0 auto 10px auto;">
+          <input type="text" id="postCaption" placeholder="Write description / Part No..." style="flex:1; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px;">
+          <button class="ai-btn" onclick="triggerAICaption()">🤖 Ask AI</button>
+        </div>
+        <input type="text" id="postLocation" placeholder="📍 Add Location (Mumbai, India...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
+        <input type="text" id="postMusic" placeholder="🎵 Add Music Name (Naseeb Ka King...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
+        
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:15px;">
+          <input type="checkbox" id="lockPostToggle" style="width:18px; height:18px; cursor:pointer;">
+          <label for="lockPostToggle" style="color:gold; font-weight:bold; font-size:13px; cursor:pointer;">🎟️ Lock in VIP Vault (Subscription Room)</label>
+        </div>
+        
+        <button onclick="publishMedia()" style="padding:14px; background:#0095f6; border:none; color:white; border-radius:8px; font-weight:bold; width:85%;">Broadcast Live 🚀</button>
+      </div>
+    </div>
+
+    <!-- ================= 📨 ५. डीएम व्हॉईस चेंजर मॅट्रिक्स ================= -->
+    <div id="dm-page" class="page">
+      <div class="header"><div class="profile-top-bar" onclick="openPage('home-page')">⬅️ Voice Changer DM</div></div>
+      <div class="dm-chat-box">
+        <div>
+          <div class="voice-changer-bar">
+            <button class="voice-btn active" id="vNormal" onclick="setVoiceMode('Normal')">Normal</button>
+            <button class="voice-btn" id="vRobot" onclick="setVoiceMode('Robot')">Robot 🤖</button>
+            <button class="voice-btn" id="vHorror" onclick="setVoiceMode('Horror')">Horror 👻</button>
+          </div>
+          <div id="chatMessages" style="padding:15px; font-size:14px; text-align:left; color:#aaa;">Select voice tone filter and type...</div>
+        </div>
+        <div style="display:flex; gap:10px; padding:10px 0;">
+          <input type="text" id="dmInput" placeholder="Type secret encrypted note..." style="flex:1; background:#1c1c1e; border:1px solid #333; color:white; padding:12px; border-radius:8px;">
+          <button onclick="sendVoiceDM()" style="background:var(--accent); border:none; color:white; padding:0 20px; border-radius:8px; font-weight:bold;">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 👤 ६. खऱ्या इंस्टाग्राम प्रोफाईलचे हुबेहूब पेज ================= -->
+    <div id="profile-page" class="page">
+      <div class="header">
+        <!-- 🔵 ADMIN BLUE TICK: या गियर आयकॉनवर ३ वेळा क्लिक केल्यास निळी टिक व्हेरिफाय होते! -->
+        <div class="profile-top-bar" onclick="triggerAdminPanel()">⚙️ <span id="topUsernameLabel">viralaaba</span> <span id="profileGlobalTick"></span> 🔽</div>
+        <div style="font-size:15px; cursor:pointer; color:var(--neon-cyan); font-weight:bold;" onclick="toggleNeonAuraTheme()">🌓 Neon Mode</div>
+      </div>
+
+      <div class="profile-header-container">
+        <div class="profile-main-row">
+          <div class="p-avatar-zone" id="profileMainAvatar" onclick="alert('Upload from + inside stories bar!')">👤</div>
+          <div class="profile-stats-zone">
+            <div class="stat-box"><span class="stat-num" id="postCountLabel">0</span><span class="stat-label">posts</span></div>
+            <div class="stat-box"><span class="stat-num" id="followerCountLabel">0</span><span class="stat-label">followers</span></div>
+            <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">following</span></div>
+          </div>
+        </div>
+
+        <!-- बायो डेटा -->
+        <div class="bio-text">
+          <strong id="displayProfileName">N/TV</strong><br>
+          <span id="displayBioLines">Ek minute ka break?<br>viralaaba dekh!😲<br>📩 For Paid Promotion & Collaboration Contact:viralaabaa@gmail.com</span>
+        </div>
+
+        <!-- 🎵 PROFILE ANTHEM WIDGET BAR -->
+        <div class="anthem-status-widget" id="anthemWidgetBlock" style="display:none;">
+          <div class="music-wave-bar" style="animation-delay: 0.1s;"></div>
+          <div class="music-wave-bar" style="animation-delay: 0.3s;"></div>
+          <div class="music-wave-bar" style="animation-delay: 0.5s;"></div>
+          <span>🎵 Profile Anthem Playing...</span>
+        </div>
+
+        <!-- LIVE MOOD WIDGET -->
+        <div class="mood-widget" onclick="changeLiveMoodWidget()">
+          <span>🎧 Status:</span> <strong id="moodStatusLabel">Editing Naseeb Ka King Part 5 🔥</strong>
+        </div>
+
+        <!-- प्रोफेशनल डॅशबोर्ड -->
+        <div class="dashboard-box">
+          <h4>Professional dashboard</h4>
+          <p>64.3M views in the last 30 days.</p>
+        </div>
+
+        <!-- ॲक्शन बटन्स -->
+        <div class="action-btn-row">
+          <button class="ig-btn follow-btn-active" id="mainFollowBtn" onclick="toggleLiveFollower()">Follow</button>
+          <button class="ig-btn" onclick="openEditProfile()">Edit profile</button>
+          <button class="ig-btn" style="color: #ff4444;" onclick="handleSecureLogoutEngine()">Logout 🚪</button>
+        </div>
+      </div>
+
+      <!-- ग्रिड फोल्डर स्विचेस -->
+      <div class="tab-icon-row">
+        <div class="active" id="tPosts" onclick="switchProfileTab('posts')">⌗ Grid</div>
+        <div id="tSaved" onclick="switchProfileTab('saved')">🔖 Bookmark</div>
+        <div id="tVIP" onclick="switchProfileTab('vip')" style="color:gold; font-weight:bold;">🎟️ VIP Vault</div>
+      </div>
+
+      <!-- ३x३ मीडिया ग्रिडส์ -->
+      <div class="ig-grid" id="profile-grid-ig"></div>
+      <div class="ig-grid" id="saved-grid-ig" style="display:none;"></div>
+      <div class="ig-grid" id="vip-grid-ig" style="display:none;"></div>
+    </div>
+
+    <!-- ================= 🛠️ EDIT PROFILE OVERLAY MODAL ================= -->
+    <div class="edit-modal" id="editProfileModal">
+      <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-weight:bold;">
+        <span style="color:#ff4444; cursor:pointer;" onclick="closeEditProfile()">Cancel</span>
+        <span>Modify Profile Data</span>
+        <span style="color:var(--accent); cursor:pointer;" onclick="saveProfileData()">Done</span>
+      </div>
+      <div class="input-group"><label>Username ID</label><input type="text" id="inputUsername" value="viralaaba"></div>
+      <div class="input-group"><label>Display Name</label><input type="text" id="inputProfileName" value="N/TV"></div>
+      <div class="input-group"><label>Bio Grid Lines</label><textarea id="inputBio" rows="3">Ek minute ka break?&#10;viralaaba dekh!😲&#10;📩 For Paid Promotion & Collaboration Contact:viralaabaa@gmail.com</textarea></div>
+    </div>
+
+    <!-- बॉटम नेव्हिगेशन बार -->
+    <div class="bottom-nav">
+      <div class="nav-btn" onclick="openPage('home-page'); handleAnthemStop();">🏠</div>
+      <div class="nav-btn" onclick="openPage('explore-page'); handleAnthemStop();">🔍</div>
+      <div class="nav-btn" onclick="openPage('reels-page'); handleAnthemStop();">🎬</div>
+      <div class="nav-btn" onclick="openPage('upload-page'); handleAnthemStop();">➕</div>
+      <div class="nav-btn" onclick="openPage('profile-page'); handleAnthemStart();">👤</div>
+    </div>
+
   </div>
 
   <script>
     let currentUploadType = 'post';
     let selectedMediaArray = [];
     let totalPostsUploaded = 0;
-    let currentFollowers = 148000;
+    let currentFollowers = 0;
     let isFollowing = false;
     let lastTap = 0;
     let clickCount = 0;
     let activeStoryBase64 = null;
     let storyTimer = null;
     let activeVoiceMode = 'Normal';
+
+    // ================= 🔐 LOGIN & AUTH LOGIC SYSTEM =================
+    function checkExistingSession() {
+      const activeUser = localStorage.getItem('popx_active_user');
+      if (activeUser) {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('main-app-framework').style.display = 'block';
+        
+        // लोकल डेटाबेसवरून प्रोफाइल युझरनेम लोड करणे
+        document.getElementById('topUsernameLabel').innerText = activeUser;
+        document.getElementById('inputUsername').value = activeUser;
+        
+        // फॉलोअर्स लोड करणे
+        const localFollowers = localStorage.getItem('popx_followers_' + activeUser) || "0";
+        currentFollowers = parseInt(localFollowers);
+        document.getElementById('followerCountLabel').innerText = currentFollowers === 0 ? "0" : (currentFollowers >= 1000 ? (currentFollowers/1000).toFixed(0) + "K" : currentFollowers);
+        
+        const followState = localStorage.getItem('popx_follow_state_' + activeUser);
+        if(followState === 'true') {
+          isFollowing = true;
+          const btn = document.getElementById('mainFollowBtn');
+          btn.innerText = "Following";
+          btn.classList.remove('follow-btn-active');
+        }
+      } else {
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('main-app-framework').style.display = 'none';
+      }
+    }
+
+    function handleSecureAuthEngine() {
+      const usernameInput = document.getElementById('authUsernameInput').value.trim();
+      const passwordInput = document.getElementById('authPasswordInput').value.trim();
+
+      if (!usernameInput || !passwordInput) {
+        alert("Please enter both Username and Password! ❌");
+        return;
+      }
+
+      // युझर डेटा सेव्ह करणे आणि लॉग इन करणे
+      localStorage.setItem('popx_active_user', usernameInput);
+      localStorage.setItem('popx_pass_' + usernameInput, passwordInput);
+      
+      alert("Successfully Logged In / Registered! 🚀");
+      checkExistingSession();
+    }
+
+    function handleSecureLogoutEngine() {
+      if(confirm("Are you sure you want to logout? 🚪")) {
+        handleAnthemStop();
+        localStorage.removeItem('popx_active_user');
+        location.reload();
+      }
+    }
+
+    // ऑटोमॅटिकली सेशन चेक करा फाईल लोड होताना
+    window.onload = function() {
+      checkExistingSession();
+    };
 
     function openPage(id) {
       document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
@@ -382,17 +470,31 @@
     function closeEditProfile() { document.getElementById('editProfileModal').classList.remove('open'); document.getElementById('modalBackdrop').style.display = 'none'; }
     
     function saveProfileData() {
-      document.getElementById('topUsernameLabel').innerText = document.getElementById('inputUsername').value.trim();
+      const activeUser = localStorage.getItem('popx_active_user');
+      const newUsername = document.getElementById('inputUsername').value.trim();
+      
+      if(!newUsername) return alert("Username cannot be empty!");
+      
+      localStorage.setItem('popx_active_user', newUsername);
+      document.getElementById('topUsernameLabel').innerText = newUsername;
       document.getElementById('displayProfileName').innerText = document.getElementById('inputProfileName').value.trim();
       document.getElementById('displayBioLines').innerHTML = document.getElementById('inputBio').value.replace(/\n/g, '<br>');
       closeEditProfile();
     }
 
     function toggleLiveFollower() {
+      const activeUser = localStorage.getItem('popx_active_user');
       isFollowing = !isFollowing;
-      document.getElementById('mainFollowBtn').innerText = isFollowing ? "Following" : "Follow";
-      document.getElementById('mainFollowBtn').classList.toggle('follow-btn-active', !isFollowing);
-      document.getElementById('followerCountLabel').innerText = isFollowing ? "148K" : "148K";
+      currentFollowers = isFollowing ? 1 : 0;
+      
+      // लोकल स्टोरेजमध्ये फॉलो स्टेट सेव्ह करा
+      localStorage.setItem('popx_followers_' + activeUser, currentFollowers);
+      localStorage.setItem('popx_follow_state_' + activeUser, isFollowing);
+
+      const btn = document.getElementById('mainFollowBtn');
+      btn.innerText = isFollowing ? "Following" : "Follow";
+      btn.classList.toggle('follow-btn-active', !isFollowing);
+      document.getElementById('followerCountLabel').innerText = currentFollowers;
     }
 
     function setUploadType(type) {
