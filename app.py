@@ -1,213 +1,312 @@
-from flask import Flask, render_template_string, request, session, redirect, url_for
-from flask_socketio import SocketIO, emit, join_room, leave_room
-import os
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'piyush_ultra_secure_chat_2026'
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-# 🔒 डेटाबेऐवजी तात्पुरती मेमरी (सर्व्हर चालू असेपर्यंत युजर्स आणि रूम्स राहतील)
-# तुम्ही कोणताही युझरनेम आणि पासवर्ड टाकून लॉगिन करू शकता!
-USERS = {} 
-ROOMS = {} # रूम कोड आणि त्यातील मेसेज साठवण्यासाठी
-
-html_template = '''
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Room Chat System</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <style>
-        :root {
-            --bg-dark: #111b21; --panel-bg: #202c33; --wa-green: #00a884;
-            --text-light: #e9edef; --text-muted: #8696a0; --msg-sent: #005c4b; --msg-rcv: #202c33;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg-dark); color: var(--text-light); display: flex; justify-content: center; align-items: center; height: 100vh; }
-        
-        .container { width: 100%; max-width: 450px; height: 90vh; background: #0b141a; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 25px rgba(0,0,0,0.5); }
-        .header { background: var(--panel-bg); padding: 15px; text-align: center; font-size: 18px; font-weight: bold; border-bottom: 1px solid #2f3b43; color: var(--wa-green); }
-        
-        /* Forms styling */
-        .page-box { padding: 30px; display: flex; flex-direction: column; gap: 15px; justify-content: center; height: 100%; }
-        input { width: 100%; padding: 12px 16px; border: 1px solid #2f3b43; border-radius: 8px; background: var(--panel-bg); color: white; font-size: 15px; outline: none; }
-        input:focus { border-color: var(--wa-green); }
-        button { width: 100%; padding: 12px; background: var(--wa-green); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #008069; }
-        .error { color: #f25c5c; font-size: 13px; text-align: center; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PopX Pro - Final Server Version</title>
+  
+  <!-- 🌐 ऑनलाईन क्लाऊड सर्व्हर जोडण्यासाठी Supabase लायब्ररी -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    :root { --bg: #000; --text: #fff; --accent: #0095f6; --card: #121212; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+    
+    /* 🔐 लॉगिन आणि साईनअप स्क्रीनचे कडक डिझाईन */
+    .auth-container { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 25px; box-sizing: border-box; }
+    .auth-box { width: 100%; max-width: 350px; text-align: center; }
+    .auth-box input { width: 100%; padding: 14px; margin: 10px 0; background: #1c1c1e; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; font-size: 15px; }
+    
+    /* 🚀 १००% टच वर्किंग बटणे */
+    .btn-action { width: 100%; padding: 14px; background: var(--accent); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; display: block; }
+    .btn-switch { width: 100%; padding: 14px; background: #262626; border: 1px solid #444; color: #fff; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 15px; display: block; }
+    
+    /* 📱 मुख्य ॲप्लिकेशन लेआउट */
+    .main-app { display: none; }
+    .page { height: calc(100vh - 110px); overflow-y: auto; padding-bottom: 20px; box-sizing: border-box; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #262626; background: #000; height: 50px; box-sizing: border-box; }
+    .logo { font-weight: bold; font-size: 24px; font-style: italic; background: linear-gradient(45deg, #f09433, #dc2743); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 24px; z-index: 1000; height: 60px; box-sizing: border-box; }
+    .nav-btn { cursor: pointer; padding: 0 10px; }
 
-        /* Chat Window styling */
-        .chat-area { flex: 1; display: flex; flex-direction: column; height: 100%; }
-        .room-info { background: var(--panel-bg); padding: 10px 15px; font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-        .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
-        .rcv { background: var(--msg-rcv); align-self: flex-start; border-top-left-radius: 0; }
-        .msg-user { font-size: 11px; font-weight: bold; color: #53bdeb; margin-bottom: 2px; display: block; }
-        .system-msg { background: rgba(255,255,255,0.05); color: var(--text-muted); align-self: center; font-size: 12px; padding: 4px 10px; border-radius: 6px; }
-
-        .chat-footer { padding: 10px; background: #1f2c34; display: flex; gap: 8px; align-items: center; }
-        .chat-footer input { flex: 1; border-radius: 20px; }
-        .chat-footer button { width: 42px; height: 42px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; }
-    </style>
+    /* 📸 इंस्टाग्राम स्टाईल लेआउट्स */
+    .stories-bar { display: flex; gap: 12px; padding: 10px; overflow-x: auto; border-bottom: 1px solid #1c1c1e; }
+    .story-ring { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #dc2743; padding: 2px; flex-shrink: 0; }
+    .post-card { padding: 15px; border-bottom: 1px solid #1c1c1e; }
+    .post-img { width: 100%; border-radius: 8px; margin-top: 10px; background: #111; min-height: 200px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 10px; }
+    .grid-item { aspect-ratio: 1/1; background-color: #222; background-size: cover; background-position: center; }
+    .upload-box { width: 85%; border: 2px dashed #333; padding: 40px 10px; border-radius: 10px; margin: 0 auto 20px auto; cursor: pointer; background: #0a0a0a; }
+    .btn-like { padding: 6px 12px; border: none; border-radius: 4px; background: var(--accent); color: white; cursor: pointer; font-weight: bold; margin-top: 8px; }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- १. लॉगिन पेज -->
-        {% if page == 'login' %}
-            <div class="header">🔐 VIP Secure Login</div>
-            <form class="page-box" method="POST" action="/login">
-                <input type="text" name="username" placeholder="युझरनेम टाका..." required>
-                <input type="password" name="password" placeholder="पासवर्ड सेट करा..." required>
-                <button type="submit">लॉगिन / रजिस्ट्रेशन करा</button>
-                {% if error %}<div class="error">{{ error }}</div>{% endif %}
-            </form>
+  <!-- 🔐 १. LOGIN / SIGNUP SCREEN (इन्स्टाग्राम सारखी परफेक्ट डबल बटण सिस्टीम) -->
+  <div id="auth-screen" class="auth-container">
+    <div class="auth-box">
+      <h1 class="logo" id="auth-logo-text" style="font-size: 42px; margin-bottom: 35px;">PopX Pro</h1>
+      
+      <div id="auth-form">
+        <input type="email" id="auth-email" placeholder="Email Address">
+        <input type="password" id="auth-password" placeholder="Password (Min 6 characters)">
+        
+        <!-- मुख्य निळे बटण -->
+        <button id="auth-main-btn" class="btn-action" onclick="submitAuthentication()">Log In</button>
+        
+        <!-- खाते तयार करण्याचे ग्रे बटण -->
+        <button id="auth-secondary-btn" class="btn-switch" onclick="toggleAuthViewMode()">Create New Account</button>
+      </div>
+    </div>
+  </div>
 
-        <!-- २. रूम सिलेक्ट करण्याचा पेज -->
-        {% elif page == 'dashboard' %}
-            <div class="header">👋 स्वागत आहे, {{ username }}!</div>
-            <div class="page-box">
-                <form method="POST" action="/join-room" style="display:flex; flex-direction:column; gap:12px;">
-                    <h4 style="color: var(--text-muted);">प्रायव्हेट रूम जॉईन करा:</h4>
-                    <input type="text" name="room_code" placeholder="गुपीत रूम कोड टाका (उदा. 9999)..." required>
-                    <button type="submit">रूममध्ये प्रवेश करा ➔</button>
-                </form>
-                <hr style="border: 0; border-top: 1px solid #2f3b43; margin: 10px 0;">
-                <a href="/logout" style="text-align:center; color:#f25c5c; text-decoration:none; font-size:14px;">लॉगआउट करा</a>
-            </div>
-
-        <!-- ३. मुख्य लाईव्ह चॅटिंग रूम -->
-        {% elif page == 'chat' %}
-            <div class="chat-area">
-                <div class="header">💬 {{ room_code }} - प्रायव्हेट रूम</div>
-                <div class="room-info">
-                    <span>युझर: <b>{{ username }}</b></span>
-                    <a href="/dashboard" style="color: #f25c5c; text-decoration: none; font-weight:bold;">रूम सोडा ❌</a>
-                </div>
-                
-                <div class="chat-messages" id="chatBox">
-                    <!-- जुने मेसेजेस लोड करणे -->
-                    {% for m in history %}
-                        <div class="msg {% if m.user == username %}sent{% else %}rcv{% endif %}">
-                            <span class="msg-user">{{ m.user }}</span>
-                            <div>{{ m.text }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div class="chat-footer">
-                    <input type="text" id="msgInput" placeholder="मेसेज टाईप करा चीफ..." autocomplete="off">
-                    <button onclick="sendLiveMsg()">➔</button>
-                </div>
-            </div>
-
-            <script>
-                const socket = io();
-                const chatBox = document.getElementById('chatBox');
-                const msgInput = document.getElementById('msgInput');
-                
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-                // रूममध्ये ऑटोमॅटिकली कनेक्ट होणे (Socket Rooms)
-                socket.emit('join', { username: "{{ username }}", room: "{{ room_code }}" });
-
-                // सर्व्हरकडून येणारे मेसेज स्क्रीनवर दाखवणे
-                socket.on('message', function(data) {
-                    const div = document.createElement('div');
-                    if (data.user === "System") {
-                        div.className = "system-msg";
-                        div.innerText = data.text;
-                    } else {
-                        div.className = "msg " + (data.user === "{{ username }}" ? "sent" : "rcv");
-                        div.innerHTML = `<span class="msg-user">${data.user}</span><div>${data.text}</div>`;
-                    }
-                    chatBox.appendChild(div);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                });
-
-                function sendLiveMsg() {
-                    const txt = msgInput.value.trim();
-                    if(txt !== "") {
-                        socket.emit('text_message', { text: txt, room: "{{ room_code }}", username: "{{ username }}" });
-                        msgInput.value = "";
-                    }
-                }
-
-                msgInput.addEventListener("keyup", function(e) { if(e.key === "Enter") sendLiveMsg(); });
-            </script>
-        {% endif %}
+  <!-- 📱 २. MAIN APP SCREEN (लॉगिन यशस्वी झाल्यावर ऑटोमॅटिक उघडणार) -->
+  <div id="main-app-screen" class="main-app">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">PopX Pro</div>
+      <div style="font-size:14px; color:#ff4444; font-weight:bold; cursor:pointer; padding:5px;" onclick="handleUserLogout()">Logout 🚪</div>
     </div>
 
+    <!-- 🏠 HOME PAGE (ऑनलाईन सर्व्हर लाईव्ह फीड) -->
+    <div id="home-page" class="page" style="display: block;">
+      <div class="stories-bar">
+        <div class="story-ring"><div style="width:100%; height:100%; border-radius:50%; background:#333"></div></div>
+        <div class="story-ring"><div style="width:100%; height:100%; border-radius:50%; background:#444"></div></div>
+      </div>
+      <div id="live-feed">
+        <p style="text-align:center; color:#888; padding:30px;">Connecting to Cloud Server...</p>
+      </div>
+    </div>
+
+    <!-- 🔍 SEARCH PAGE -->
+    <div id="search-page" class="page" style="display: none;">
+      <div style="padding:15px;"><input type="text" placeholder="Search accounts..." style="width:100%; padding:10px; border-radius:8px; border:none; background:#1c1c1e; color:#fff;"></div>
+      <div class="grid" id="explore-grid"></div>
+    </div>
+
+    <!-- ➕ UPLOAD PAGE (गॅलरीवरून फोटो सर्व्हरवर पाठवणारी खणखणीत सिस्टीम) -->
+    <div id="upload-page" class="page" style="display: none;">
+      <div style="padding:40px; text-align:center;">
+        <h3 style="margin-bottom:25px;">Create Live Post</h3>
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+          <span style="font-size:40px;">🖼️</span>
+          <p id="uploadStatusText" style="margin:10px 0 0 0; color:#888;">Click to Open Gallery</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="imageSelected(this)">
+        <input type="text" id="postCaption" placeholder="Write a caption..." style="width:85%; padding:12px; margin-bottom:25px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:6px;"><br>
+        <button onclick="uploadPostToCloudServer()" style="padding:12px 35px; background:#0095f6; border:none; color:white; border-radius:6px; font-weight:bold; cursor:pointer; width:85%;">Publish Post 🚀</button>
+      </div>
+    </div>
+
+    <!-- 🎬 REELS PAGE -->
+    <div id="reels-page" class="page" style="display: none;">
+      <video style="width:100%; height:100%; object-fit:cover;" src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-light-40492-large.mp4" loop autoplay muted></video>
+    </div>
+
+    <!-- 👤 PROFILE PAGE (तुमच्या सर्व जुन्या पोस्ट्स ऑनलाईन परत आणणारे पेज) -->
+    <div id="profile-page" class="page" style="display: none;">
+      <div style="padding:25px 20px; text-align:center;">
+        <div style="width:85px; height:85px; border-radius:50%; background:#262626; margin:0 auto 10px auto; font-size:35px; display:flex; justify-content:center; align-items:center;">👤</div>
+        <h3 id="profile-username" style="margin:5px 0;">Loading...</h3>
+        <p style="color:#888; margin:5px 0 15px 0;">App Developer | Cloud Account Sync</p>
+        <div class="grid" id="profile-grid"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="nav-btn" onclick="openPage('home')">🏠</div>
+      <div class="nav-btn" onclick="openPage('search')">🔍</div>
+      <div class="nav-btn" onclick="openPage('upload')">➕</div>
+      <div class="nav-btn" onclick="openPage('reels')">🎬</div>
+      <div class="nav-btn" onclick="openPage('profile')">👤</div>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 ऑनलाईन मोफत क्लाऊड सर्व्हरची लाईव्ह मास्टर चावी (Supabase Configuration)
+    const SUPABASE_URL = "https://wzbxmscbttvpsomxqqwz.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6Ynhtc2NidHR2cHNvbXhxcXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcwOTAwMDAsImV4cCI6MjAyNjg2MDAwMH0.1v7_AnOnL-mR_5UoW_uYvO7W3z7H5_Z6fO6h5_W7z7E";
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let isLoginViewActive = true;
+    let currentUserSession = null;
+    let selectedImageFile = null;
+
+    // युझर आधीपासून लॉग-इन आहे का ते तपासणे (Auto-Login System)
+    async function checkExistingSession() {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        currentUserSession = data.session.user;
+        displayMainApplication();
+      }
+    }
+    checkExistingSession();
+
+    // लॉगिन आणि साईनअप स्क्रीनमधील बटणे अदलाबदल करणे
+    function toggleAuthViewMode() {
+      isLoginViewActive = !isLoginViewActive;
+      const mainBtn = document.getElementById('auth-main-btn');
+      const secBtn = document.getElementById('auth-secondary-btn');
+      const logoText = document.getElementById('auth-logo-text');
+
+      if(isLoginViewActive) {
+        logoText.innerText = "PopX Pro";
+        mainBtn.innerText = "Log In";
+        secBtn.innerText = "Create New Account";
+        secBtn.style.background = "#262626";
+        secBtn.style.color = "#fff";
+      } else {
+        logoText.innerText = "New Account 📝";
+        mainBtn.innerText = "Register Account";
+        secBtn.innerText = "Back to Log In";
+        secBtn.style.background = "#331111";
+        secBtn.style.color = "#ff4444";
+      }
+    }
+
+    // 🔐 सर्व्हरवर लॉगिन आणि साईनअप सबमिट करणे
+    async function submitAuthentication() {
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+
+      if (!email || !password) return alert("Please fill all details!");
+      if (password.length < 6) return alert("Password must be at least 6 characters!");
+
+      alert("Connecting to Cloud Server... Please wait!");
+
+      if (isLoginViewActive) {
+        // १. लॉग-इन करणे
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return alert("Login Error: " + error.message);
+        currentUserSession = data.user;
+        alert("Welcome Back! 🚀");
+        displayMainApplication();
+      } else {
+        // २. नवीन खाते तयार करणे
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) return alert("Registration Error: " + error.message);
+        alert("Account Created Successfully! You can Log In now. 🎉");
+        isLoginViewActive = false;
+        toggleAuthViewMode();
+      }
+    }
+
+    function displayMainApplication() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('main-app-screen').style.display = 'block';
+      document.getElementById('profile-username').innerText = currentUserSession.email.split('@')[0] + " ✓";
+      fetchCloudPosts();
+    }
+
+    function handleUserLogout() {
+      supabase.auth.signOut();
+      location.reload();
+    }
+
+    function openPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.getElementById(id + '-page').style.display = 'block';
+      if (id === 'home' || id === 'profile') fetchCloudPosts();
+    }
+
+    function imageSelected(input) {
+      if(input.files && input.files[0]) {
+        selectedImageFile = input.files[0];
+        document.getElementById('uploadStatusText').innerText = "Selected: " + selectedImageFile.name;
+        document.getElementById('uploadStatusText').style.color = "#0095f6";
+      }
+    }
+
+    // 🚀 गॅलरी फोटो ऑनलाईन सर्व्हर स्टोरेजवर अपलोड करणे
+    async function uploadPostToCloudServer() {
+      const caption = document.getElementById('postCaption').value;
+      if (!selectedImageFile) return alert("Please select an image first!");
+
+      alert("Uploading Image to Cloud Storage... Please wait!");
+      const fileName = Date.now() + "_" + selectedImageFile.name;
+      
+      // १. स्टोरेज बकेटमध्ये फोटो टाकणे
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('popx_photos')
+        .upload('public/' + fileName, selectedImageFile);
+
+      if (storageError) {
+        console.error(storageError);
+        return alert("Storage Error! Please choose a normal photo.");
+      }
+
+      // २. फोटोची ऑनलाईन लिंक मिळवणे
+      const { data: urlData } = supabase.storage.from('popx_photos').getPublicUrl('public/' + fileName);
+      const publicImageUrl = urlData.publicUrl;
+
+      // ३. डेटाबेस टेबलमध्ये युझरनेमसह पोस्ट सेव्ह करणे
+      const { error: dbError } = await supabase
+        .from('popx_posts')
+        .insert([{ 
+          username: currentUserSession.email.split('@')[0], 
+          image_url: publicImageUrl, 
+          caption: caption || 'No caption' 
+        }]);
+
+      if (dbError) return alert("Database Save Error!");
+
+      alert("Post Shared to Cloud Server! 🚀");
+      
+      // सर्व फॉर्म रीसेट करणे
+      document.getElementById('fileInput').value = "";
+      document.getElementById('postCaption').value = "";
+      document.getElementById('uploadStatusText').innerText = "Click to Open Gallery";
+      document.getElementById('uploadStatusText').style.color = "#888";
+      selectedImageFile = null;
+      
+      openPage('home');
+    }
+
+    // 📥 सर्व्हरवरून डेटा सिंक करून लाईव्ह फीडवर दाखवणे
+    async function fetchCloudPosts() {
+      const feed = document.getElementById('live-feed');
+      const profileGrid = document.getElementById('profile-grid');
+      
+      const { data: posts, error } = await supabase
+        .from('popx_posts')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) return;
+
+      feed.innerHTML = "";
+      if (profileGrid) profileGrid.innerHTML = "";
+
+      if (!posts || posts.length === 0) {
+        feed.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">No posts on server yet. Upload your first pic!</p>';
+        return;
+      }
+
+      posts.forEach(post => {
+        // होम फीड कार्ड डिझाईन
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.innerHTML = `<b>@${post.username}</b> ✓<br><img class="post-img" src="${post.image_url}"><p>${post.caption}</p>
+        <button class="btn-like" onclick="alert('Liked ❤️')">❤️ Like</button>`;
+        feed.appendChild(card);
+
+        // प्रोफाईल पेजवर जुन्या पोस्ट्स ऑटोमॅटिक सिंक होणार!
+        if (currentUserSession && post.username === currentUserSession.email.split('@')[0]) {
+          const item = document.createElement('div');
+          item.className = 'grid-item';
+          item.style.backgroundImage = `url(${post.image_url})`;
+          if (profileGrid) profileGrid.appendChild(item);
+        }
+      });
+    }
+
+    // सर्च पेजसाठी एक्सप्लोर ग्रिड
+    for(let i=0; i<6; i++) {
+      const d = document.createElement('div'); d.className = 'grid-item';
+      document.getElementById('explore-grid').appendChild(d);
+    }
+  </script>
 </body>
 </html>
-'''
-
-@app.route('/')
-def home():
-    if 'username' in session:
-        return redirect(url_for('dashboard'))
-    return render_template_string(html_template, page='login')
-
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username').strip()
-    password = request.form.get('password').strip()
-    
-    if not username or not password:
-        return render_template_string(html_template, page='login', error="कृपया सर्व माहिती भरा.")
-    
-    # सोपी रजिस्ट्रेशन आणि लॉगिन सिस्टीम
-    if username in USERS:
-        if USERS[username] != password:
-            return render_template_string(html_template, page='login', error="पासवर्ड चुकीचा आहे!")
-    else:
-        USERS[username] = password # नवीन युझर सेव्ह करा
-        
-    session['username'] = username
-    return redirect(url_for('dashboard'))
-
-@app.route('/dashboard')
-def dashboard():
-    if 'username' not in session: return redirect(url_for('home'))
-    return render_template_string(html_template, page='dashboard', username=session['username'])
-
-@app.route('/join-room', methods=['POST'])
-def join_user_room():
-    if 'username' not in session: return redirect(url_for('home'))
-    room_code = request.form.get('room_code').strip().upper()
-    
-    if not room_code: return redirect(url_for('dashboard'))
-    
-    session['room'] = room_code
-    if room_code Pallavi not in ROOMS:
-        ROOMS[room_code] = [] # नवीन रूम तयार करा
-        
-    return render_template_string(html_template, page='chat', username=session['username'], room_code=room_code, history=ROOMS[room_code])
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
-
-# 🌐 SOCKET.IO इव्हेंट्स (रूम मॅनेजमेंट)
-@socketio.on('join')
-def on_join(data):
-    username = data['username']
-    room = data['room']
-    join_room(room) # युझरला त्या विशिष्ट रूम कोडच्या ग्रुपमध्ये पाठवणे
-    emit('message', {'user': 'System', 'text': f'🔹 {username} रूममध्ये सामील झाला आहे.'}, room=room)
-
-@socketio.on('text_message')
-def on_message(data):
-    room = data['room']
-    msg_data = {'user': data['username'], 'text': data['text']}
-    ROOMS[room].append(msg_data) # मेसेज रूमच्या हिस्ट्रीमध्ये सेव्ह करा
-    emit('message', msg_data, room=room) # फक्त त्याच रूममधील लोकांना मेसेज पाठवा
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    socketio.run(app, host='0.0.0.0', port=port)
