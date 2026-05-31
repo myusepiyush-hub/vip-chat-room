@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopX Pro - Global Cloud Server V10</title>
+  <title>PopX Pro - Global Cloud Server V11</title>
   
   <!-- Firebase App & Realtime Database SDK Core -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -21,6 +21,7 @@
     .auth-card { width: 100%; max-width: 350px; text-align: center; }
     .auth-input { width: 100%; background: #1c1c1e; border: 1px solid #333; color: white; padding: 14px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; outline: none; }
     .auth-btn { width: 100%; background: #0095f6; border: none; color: white; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; }
+    .auth-btn:active { background: #0077c2; }
 
     /* Framework Grid */
     #main-app-framework { display: none; }
@@ -30,7 +31,7 @@
     .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--bg); position: sticky; top: 0; z-index: 2000; height: 50px; border-bottom: 1px solid var(--border); box-shadow: var(--neon-glow); }
     .profile-top-bar { font-weight: bold; font-size: 22px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; font-size: 24px; z-index: 2000; height: 60px; box-shadow: var(--neon-glow); }
-    .nav-btn { cursor: pointer; transition: transform 0.2s; }
+    .nav-btn { pointer-events: auto; cursor: pointer; transition: transform 0.2s; }
 
     /* Feed Layout */
     .stories-bar { display: flex; gap: 12px; padding: 12px; overflow-x: auto; border-bottom: 1px solid #1c1c1e; align-items: center; }
@@ -77,7 +78,7 @@
     .story-progress { position: absolute; top: 15px; left: 5%; width: 90%; height: 3px; background: #333; border-radius: 2px; overflow: hidden; }
     .story-progress-bar { width: 0%; height: 100%; background: #fff; }
 
-    /* Profile UI without Audio elements */
+    /* Profile UI */
     .profile-header-container { padding: 15px 15px 5px 15px; }
     .profile-main-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .p-avatar-zone { width: 86px; height: 86px; border-radius: 50%; background: #262626; display: flex; justify-content: center; align-items: center; font-size: 32px; background-size: cover; background-position: center; border: 1px solid #262626; }
@@ -132,7 +133,7 @@
       <input type="text" id="authUsernameInput" class="auth-input" placeholder="Create Username / ID">
       <input type="password" id="authPasswordInput" class="auth-input" placeholder="Set Secure Password">
       
-      <button class="auth-btn" onclick="handleSecureCloudAuth()">Sign In / Create Account 🚀</button>
+      <button class="auth-btn" id="submitAuthBtn" onclick="handleSecureCloudAuth()">Sign In / Create Account 🚀</button>
       <p style="color: #555; font-size: 11px; margin-top: 20px;">Powered by Google Firebase Systems.</p>
     </div>
   </div>
@@ -219,7 +220,7 @@
       </div>
     </div>
 
-    <!-- VOICE CHANGER DM (LIVE MESSAGES SHOWN) -->
+    <!-- VOICE CHANGER DM -->
     <div id="dm-page" class="page">
       <div class="header"><div class="profile-top-bar" onclick="openPage('home-page')">⬅️ Voice Changer DM</div></div>
       <div class="dm-chat-box">
@@ -258,272 +259,4 @@
           <span id="displayBioLines">Ek minute ka break?<br>viralaaba dekh!😲</span>
         </div>
         <div class="mood-widget" onclick="changeLiveMoodWidget()">
-          <span>🎧 Status:</span> <strong id="moodStatusLabel">Editing Naseeb Ka King Part 5 🔥</strong>
-        </div>
-        <div class="dashboard-box">
-          <h4>Professional dashboard</h4>
-          <p>Cloud Server Live Indexes Syncing.</p>
-        </div>
-        <div class="action-btn-row">
-          <button class="ig-btn follow-btn-active" id="mainFollowBtn" onclick="toggleLiveFollower()">Follow</button>
-          <button class="ig-btn" onclick="openEditProfile()">Edit profile</button>
-          <button class="ig-btn" style="color:#ff4444;" onclick="handleSecureLogout()">Logout 🚪</button>
-        </div>
-      </div>
-      <div class="tab-icon-row">
-        <div class="active" id="tPosts" onclick="switchProfileTab('posts')">⌗ Grid</div>
-        <div id="tSaved" onclick="switchProfileTab('saved')">🔖 Bookmark</div>
-        <div id="tVIP" onclick="switchProfileTab('vip')" style="color:gold; font-weight:bold;">🎟️ VIP Vault</div>
-      </div>
-      <div class="ig-grid" id="profile-grid-ig"></div>
-      <div class="ig-grid" id="saved-grid-ig" style="display:none;"></div>
-      <div class="ig-grid" id="vip-grid-ig" style="display:none;"></div>
-    </div>
-
-    <!-- MODIFY PROFILE OVERLAY MODAL -->
-    <div class="edit-modal" id="editProfileModal">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-weight:bold;">
-        <span style="color:#ff4444; cursor:pointer;" onclick="closeEditProfile()">Cancel</span>
-        <span>Modify Profile Data</span>
-        <span style="color:var(--accent); cursor:pointer;" onclick="saveProfileData()">Done</span>
-      </div>
-      <div class="input-group"><label>Username ID</label><input type="text" id="inputUsername" value="viralaaba"></div>
-      <div class="input-group"><label>Display Name</label><input type="text" id="inputProfileName" value="N/TV"></div>
-      <div class="input-group"><label>Bio Grid Lines</label><textarea id="inputBio" rows="3">Ek minute ka break?&#10;viralaaba dekh!😲</textarea></div>
-    </div>
-
-    <!-- NAVIGATION BOTTOM -->
-    <div class="bottom-nav">
-      <div class="nav-btn" onclick="openPage('home-page');">🏠</div>
-      <div class="nav-btn" onclick="openPage('explore-page');">🔍</div>
-      <div class="nav-btn" onclick="openPage('reels-page');">🎬</div>
-      <div class="nav-btn" onclick="openPage('upload-page');">➕</div>
-      <div class="nav-btn" onclick="openPage('profile-page');">👤</div>
-    </div>
-
-  </div>
-
-  <script>
-    // ================= ⚙️ GOOGLE FIREBASE CONFIGURATION BLOCK =================
-    const firebaseConfig = {
-      authDomain: "popx-74ebd.firebaseapp.com",
-      databaseURL: "https://popx-74ebd-default-rtdb.firebaseio.com/",
-      projectId: "popx-74ebd",
-      storageBucket: "popx-74ebd.firebasestorage.app"
-    };
-
-    // Initialize Firebase
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const database = firebase.database();
-
-    let currentUploadType = 'post';
-    let selectedMediaArray = [];
-    let totalPostsUploaded = 0;
-    let currentFollowers = 0;
-    let isFollowing = false;
-    let lastTap = 0;
-    let clickCount = 0;
-    let activeStoryBase64 = null;
-    let storyTimer = null;
-    let activeVoiceMode = 'Normal';
-
-    // ================= 🔐 REAL CLOUD AUTH ENGINE =================
-    function checkSecureSessionIndex() {
-      const activeUser = localStorage.getItem('popx_active_user');
-      if (activeUser) {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-app-framework').style.display = 'block';
-        document.getElementById('topUsernameLabel').innerText = activeUser;
-        document.getElementById('inputUsername').value = activeUser;
-        
-        // Load Real Follower state from Server/Localstorage
-        const savedFollowers = localStorage.getItem('popx_followers_' + activeUser) || "0";
-        currentFollowers = parseInt(savedFollowers);
-        document.getElementById('followerCountLabel').innerText = currentFollowers;
-
-        if (localStorage.getItem('popx_is_following_' + activeUser) === 'true') {
-          isFollowing = true;
-          document.getElementById('mainFollowBtn').innerText = "Following";
-          document.getElementById('mainFollowBtn').classList.remove('follow-btn-active');
-        }
-
-        listenToLiveGlobalStreams();
-      } else {
-        document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('main-app-framework').style.display = 'none';
-      }
-    }
-
-    function handleSecureCloudAuth() {
-      const user = document.getElementById('authUsernameInput').value.trim().toLowerCase();
-      const pass = document.getElementById('authPasswordInput').value.trim();
-
-      if (!user || !pass) return alert("Enter credentials to boot node! ❌");
-
-      database.ref('users/' + user).set({
-        password: pass,
-        lastLogin: Date.now()
-      }).then(() => {
-        localStorage.setItem('popx_active_user', user);
-        alert("Cloud Stream Active! Connected to Google Server 🌐");
-        checkSecureSessionIndex();
-      }).catch(err => alert("Server Link Error: " + err.message));
-    }
-
-    function handleSecureLogout() {
-      if(confirm("Disconnect from Cloud Matrix? 🚪")) {
-        localStorage.removeItem('popx_active_user');
-        location.reload();
-      }
-    }
-
-    window.onload = function() { checkSecureSessionIndex(); };
-
-    // ================= 🌐 CLOUD STREAM LISTENERS (LIVE SYNC) =================
-    function listenToLiveGlobalStreams() {
-      database.ref('broadcast_feed').on('value', snapshot => {
-        const feed = document.getElementById('live-feed');
-        const profileGrid = document.getElementById('profile-grid-ig');
-        const vipGrid = document.getElementById('vip-grid-ig');
-        
-        feed.innerHTML = "";
-        profileGrid.innerHTML = "";
-        vipGrid.innerHTML = "";
-        
-        const activeUser = localStorage.getItem('popx_active_user');
-        let postCount = 0;
-
-        if(snapshot.exists()) {
-          const data = snapshot.val();
-          const sortedKeys = Object.keys(data).reverse();
-
-          sortedKeys.forEach(key => {
-            const post = data[key];
-            const postId = key;
-
-            if(post.type === 'post') {
-              let slidesHTML = `<div class="carousel-slide"><img class="post-img" src="${post.media}"></div>`;
-              let vaultOverlayHTML = post.locked ? `<div class="vault-lock-overlay" id="v-${postId}"><div class="premium-badge">🎟️ VIP LOCKED</div><button class="ig-btn follow-btn-active" style="padding:5px 15px;" onclick="document.getElementById('v-${postId}').remove()">Unlock Node (Code: 1234)</button></div>` : '';
-
-              const card = document.createElement('div');
-              card.className = 'post-card';
-              card.innerHTML = `<div class="post-header"><div class="post-avatar">📺</div><div><b>${post.author}</b> <span class="blue-tick">🔵</span><div class="post-location">📍 ${post.location || 'PopX Universe'}</div></div></div><div class="carousel-view" onclick="handleDoubleTap('${postId}')">${vaultOverlayHTML}${slidesHTML}</div><div class="post-actions"><div class="action-left"><span id="like-btn-${postId}">🤍</span><span onclick="document.getElementById('box-${postId}').style.display='block'">💬</span><button class="tip-btn" onclick="alert('10 Diamonds Sent via Server! 💎')">Give Tip 💎</button></div></div><div style="padding:0 15px 5px 15px; font-size:12px; color:var(--ig-gray);">🎵 ${post.music}</div><div class="comment-box" id="box-${postId}"><div class="comment-list" id="lst-${postId}"></div><div class="comment-input-div"><input type="text" id="in-${postId}"><button onclick="sendCloudComment('${postId}')">Post</button></div></div><div style="padding:0 15px;"><b>${post.author}</b> ${post.caption}</div>`;
-              feed.appendChild(card);
-
-              if(post.author === activeUser) {
-                postCount++;
-                const item = document.createElement('div');
-                item.className = 'grid-item-ig';
-                item.style.backgroundImage = `url('${post.media}')`;
-                if(post.locked) {
-                  item.innerHTML = `<div class="grid-badge-icon">🔒 VIP</div>`;
-                  vipGrid.appendChild(item);
-                } else {
-                  profileGrid.appendChild(item);
-                }
-              }
-            }
-          });
-        }
-        document.getElementById('postCountLabel').innerText = postCount;
-      });
-    }
-
-    function publishMedia() {
-      if(selectedMediaArray.length === 0) return alert("Select files first!");
-      const activeUser = localStorage.getItem('popx_active_user');
-      const caption = document.getElementById('postCaption').value || "";
-      const location = document.getElementById('postLocation').value.trim();
-      const music = document.getElementById('postMusic').value.trim() || "Original Server Audio";
-      const isLocked = document.getElementById('lockPostToggle').checked;
-
-      database.ref('broadcast_feed').push({
-        author: activeUser,
-        type: currentUploadType,
-        media: selectedMediaArray[0],
-        caption: caption,
-        location: location,
-        music: music,
-        locked: isLocked,
-        timestamp: Date.now()
-      }).then(() => {
-        alert("Broadcast Global Ready! 🚀 Sync Done.");
-        selectedMediaArray = [];
-        document.getElementById('postCaption').value = "";
-        openPage('home-page');
-      });
-    }
-
-    function sendCloudComment(id) {
-      const activeUser = localStorage.getItem('popx_active_user');
-      const val = document.getElementById('in-' + id).value;
-      if(!val) return;
-      const cItem = document.createElement('div');
-      cItem.className = 'comment-item';
-      cItem.innerHTML = `<b>@${activeUser}:</b> ${val}`;
-      document.getElementById('lst-' + id).appendChild(cItem);
-      document.getElementById('in-' + id).value = "";
-    }
-
-    /* 👥 REAL FOLLOW LOGIC */
-    function toggleLiveFollower() {
-      const activeUser = localStorage.getItem('popx_active_user');
-      isFollowing = !isFollowing;
-      currentFollowers = isFollowing ? 1 : 0;
-      
-      localStorage.setItem('popx_followers_' + activeUser, currentFollowers);
-      localStorage.setItem('popx_is_following_' + activeUser, isFollowing);
-
-      const btn = document.getElementById('mainFollowBtn');
-      btn.innerText = isFollowing ? "Following" : "Follow";
-      btn.classList.toggle('follow-btn-active', !isFollowing);
-      document.getElementById('followerCountLabel').innerText = currentFollowers;
-    }
-
-    /* 🎙️ LIVE MESSAGE DM MATRIX */
-    function setVoiceMode(mode) {
-      activeVoiceMode = mode;
-      document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('v' + mode).classList.add('active');
-    }
-    function sendVoiceDM() {
-      const txt = document.getElementById('dmInput').value.trim();
-      if(!txt) return;
-      const chatZone = document.getElementById('chatMessages');
-      if(chatZone.innerText.includes("Select voice tone")) chatZone.innerHTML = "";
-      
-      const newMsg = document.createElement('div');
-      newMsg.style.marginBottom = "8px";
-      newMsg.innerHTML = `💬 <b>You (${activeVoiceMode}):</b> ${txt}`;
-      chatZone.appendChild(newMsg);
-      chatZone.scrollTop = chatZone.scrollHeight;
-      document.getElementById('dmInput').value = "";
-    }
-
-    function openPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
-      document.querySelectorAll('video').forEach(v => v.pause());
-    }
-    function toggleNeonAuraTheme() { document.body.classList.toggle('neon-theme'); }
-    function changeLiveMoodWidget() {
-      const moods = ["Editing Naseeb Ka King Part 5 🔥", "Cloud Active 🎧", "Scripting 🔮"];
-      const cur = document.getElementById('moodStatusLabel').innerText;
-      document.getElementById('moodStatusLabel').innerText = moods[(moods.indexOf(cur) + 1) % moods.length];
-    }
-    function openEditProfile() { document.getElementById('editProfileModal').classList.add('open'); document.getElementById('modalBackdrop').style.display = 'block'; }
-    function closeEditProfile() { document.getElementById('editProfileModal').classList.remove('open'); document.getElementById('modalBackdrop').style.display = 'none'; }
-    function saveProfileData() { document.getElementById('displayProfileName').innerText = document.getElementById('inputProfileName').value; closeEditProfile(); }
-    function setUploadType(type) { currentUploadType = type; document.getElementById('fileInput').multiple = (type === 'post'); }
-    function mediaSelected(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { selectedMediaArray = [e.target.result]; document.getElementById('uploadStatusText').innerText = "✓ Armed"; }; reader.readAsDataURL(input.files[0]); } }
-    function handleDoubleTap(postId) { const now = Date.now(); if ((now - lastTap) < 300) { document.getElementById('like-btn-' + postId).innerText = "❤️"; } lastTap = now; }
-    function playLiveStory() { if(!activeStoryBase64) return alert("Upload a story first!"); const viewer = document.getElementById('storyViewerZone'); document.getElementById('storyViewerImg').src = activeStoryBase64; viewer.style.display = 'flex'; setTimeout(() => { document.getElementById('storyProgBar').style.width = '100%'; document.getElementById('storyProgBar').style.transition = 'width 5s linear'; }, 50); storyTimer = setTimeout(() => { closeStoryView(); }, 5050); }
-    function closeStoryView() { document.getElementById('storyViewerZone').style.display = 'none'; document.getElementById('storyProgBar').style.transition = 'none'; document.getElementById('storyProgBar').style.width = '0%'; clearTimeout(storyTimer); }
-    function uploadStoryLocal(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { activeStoryBase64 = e.target.result; document.getElementById('myStoryIcon').innerText = ""; document.getElementById('myStoryIcon').style.backgroundImage = `url('${activeStoryBase64}')`; alert("Story Online! 📸"); }; reader.readAsDataURL(input.files[0]); } }
-    function triggerAdminPanel() { clickCount++; if(clickCount === 3) { document.getElementById('profileGlobalTick').innerHTML = `<span class="blue-tick">🔵</span>`; alert("Ecosystem Nodes Verified! Blue Tick Enabled 🔵"); } setTimeout(() => { clickCount = 0; }, 3000); }
-    function switchProfileTab(tab) { document.getElementById('profile-grid-ig').style.display = tab === 'posts' ? 'grid' : 'none'; document.getElementById('saved-grid-ig').style.display = tab === 'saved' ? 'grid' : 'none'; document.getElementById('vip-grid-ig').style.display = tab === 'vip' ? 'grid' : 'none'; }
-  </script>
-</body>
-</html>
+          <span>🎧 Status:</span> <strong id="moodStatusLabel">Editing Naseeb Ka King Part 5 🔥</
