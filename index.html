@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopX Pro - Supabase Cloud V22</title>
+  <title>PopX Pro - Supabase Cloud V23</title>
   
+  <!-- ========================================== -->
+  <!-- 🛰️ SUPABASE CLOUD CORE ENGINE MODULE JS -->
+  <!-- ========================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     /* ========================================== */
-    /* 🎨 MASTER THEME CONFIGURATION AND CORE VARIABLES */
+    /* 🎨 MASTER THEME CONFIGURATION AND VARIABLES */
     /* ========================================== */
     :root { 
       --bg: #000; 
@@ -222,10 +225,6 @@
       position: relative; 
     }
     
-    .post-card text {
-      user-select: text !important;
-    }
-    
     .post-header { 
       display: flex; 
       align-items: center; 
@@ -287,12 +286,12 @@
     }
     
     /* ========================================== */
-    /* 🔎 SEARCH PEOPLE INSTAGRAM LOOK STYLE */
+    /* 🔎 SEARCH PEOPLE REAL STYLE FRAMEWORK */
     /* ========================================== */
     .search-container-box { padding: 15px; background: var(--bg); }
     .search-bar-input { width: 100%; background: #1c1c1e; border: 1px solid #333; color: #fff; padding: 12px 15px; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 15px; }
     .search-results-list { display: flex; flex-direction: column; gap: 12px; }
-    .search-user-card { display: flex; align-items: center; background: #121212; padding: 10px 15px; border-radius: 10px; border: 1px solid #1c1c1e; }
+    .search-user-card { display: flex; align-items: center; background: #121212; padding: 10px 15px; border-radius: 10px; border: 1px solid #1c1c1e; cursor: pointer; }
     .search-user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #262626; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; margin-right: 12px; color: var(--accent); }
     .search-user-info { text-align: left; flex: 1; }
     .search-user-name { font-weight: bold; font-size: 14px; color: #fff; }
@@ -374,6 +373,7 @@
 </head>
 <body>
 
+  <!-- ================= ⚠️ PORTAL SCREEN ================= -->
   <div id="auth-screen">
     <div class="auth-card">
       <h1 style="font-weight: bold; font-size: 38px; font-style: italic; background: linear-gradient(45deg, #f09433, #dc2743, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;">PopX Pro</h1>
@@ -389,6 +389,7 @@
     </div>
   </div>
 
+  <!-- ================= 🌐 MAIN ECOSYSTEM FRAMEWORK ================= -->
   <div id="main-app-framework">
     <div class="backdrop" id="modalBackdrop" onclick="closeEditProfile()"></div>
     <div class="story-viewer" id="storyViewerZone" onclick="closeStoryView()">
@@ -396,6 +397,7 @@
       <img id="storyViewerImg" src="">
     </div>
 
+    <!-- 🏠 HOME SYSTEM FEED -->
     <div id="home-page" class="page">
       <div class="header">
         <div class="logo" style="font-weight: bold; font-size: 24px;">PopX Pro</div>
@@ -414,16 +416,18 @@
       </div>
     </div>
 
+    <!-- 🔎 [REAL LOOK] INSTAGRAM STYLE SEARCH PEOPLE PAGE -->
     <div id="explore-page" class="page">
       <div class="header"><div class="logo" style="font-size:20px; font-weight: bold;">Search Engine</div></div>
       <div class="search-container-box">
         <input type="text" id="globalUserSearchInput" class="search-bar-input" placeholder="🔎 Search creators by username..." oninput="triggerLiveUserSearch(this.value)">
         <div class="search-results-list" id="searchResultsContainer">
-          <p style="text-align:center; color:#555; padding:20px; font-size:13px;">Type username above to search live cloud profiles.</p>
+          <p style="text-align:center; color:#555; padding:20px; font-size:13px;">Type real username above to find global members.</p>
         </div>
       </div>
     </div>
 
+    <!-- 🎬 REELS MATRIX PLAYER -->
     <div id="reels-page" class="page" style="padding-bottom: 0;">
       <div class="reels-feed" id="reelsContainer">
         <div class="reel-card" id="defaultReelCard">
@@ -432,6 +436,7 @@
       </div>
     </div>
 
+    <!-- ➕ CORE PRODUCTION STUDIO -->
     <div id="upload-page" class="page">
       <div class="header"><div class="logo" style="font-size:20px; font-weight: bold;">Studio Core</div></div>
       <div style="padding: 15px; text-align: center;">
@@ -447,400 +452,4 @@
         <div style="display:flex; justify-content:center; align-items:center; width:85%; margin:0 auto 10px auto;">
           <input type="text" id="postCaption" placeholder="Write description / Part No..." style="flex:1; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px;">
           <button class="ai-btn" onclick="triggerAICaption()">🤖 Ask AI</button>
-        </div>
-        <input type="text" id="postLocation" placeholder="📍 Add Location (Mumbai, India...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
-        <input type="text" id="postMusic" placeholder="🎵 Add Music Name (Naseeb Ka King...)" style="width:85%; padding:12px; background:#1c1c1e; color:#fff; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:15px;">
-          <input type="checkbox" id="lockPostToggle" style="width:18px; height:18px; cursor:pointer;">
-          <label for="lockPostToggle" style="color:gold; font-weight:bold; font-size:13px; cursor:pointer;">🎟️ Lock in VIP Vault</label>
-        </div>
-        <button onclick="publishMedia()" style="padding:14px; background:#0095f6; border:none; color:white; border-radius:8px; font-weight:bold; width:85%; cursor: pointer;">Broadcast Live 🚀</button>
-      </div>
-    </div>
-
-    <div id="dm-page" class="page">
-      <div class="header"><div class="profile-top-bar" onclick="openPage('home-page')">⬅️ Voice Changer DM</div></div>
-      <div class="dm-chat-box">
-        <div>
-          <div class="voice-changer-bar">
-            <button class="voice-btn active" id="vNormal" onclick="setVoiceMode('Normal')">Normal</button>
-            <button class="voice-btn" id="vRobot" onclick="setVoiceMode('Robot')">Robot 🤖</button>
-            <button class="voice-btn" id="vHorror" onclick="setVoiceMode('Horror')">Horror 👻</button>
-          </div>
-          <div id="chatMessages" style="padding:15px; font-size:14px; text-align:left; color:#aaa; max-height: 250px; overflow-y: auto;">Select filter and type...</div>
-        </div>
-        <div style="display:flex; gap:10px; padding:10px 0;">
-          <input type="text" id="dmInput" placeholder="Type secret encrypted note..." style="flex:1; background:#1c1c1e; border:1px solid #333; color:white; padding:12px; border-radius:8px;">
-          <button onclick="sendVoiceDM()" style="background:var(--accent); border:none; color:white; padding:0 20px; border-radius:8px; font-weight:bold; cursor: pointer;">Send</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="profile-page" class="page">
-      <div class="header">
-        <div class="profile-top-bar" onclick="triggerAdminPanel()">⚙️ <span id="topUsernameLabel">viralaaba</span> <span id="profileGlobalTick"></span> 🔽</div>
-        <div style="font-size:15px; cursor:pointer; color:var(--neon-cyan); font-weight:bold;" onclick="toggleNeonAuraTheme()">🌓 Neon Mode</div>
-      </div>
-      <div class="profile-header-container">
-        <div class="profile-main-row">
-          <div class="p-avatar-zone" id="profileMainAvatar">👤</div>
-          <div class="profile-stats-zone">
-            <div class="stat-box"><span class="stat-num" id="postCountLabel">0</span><span class="stat-label">posts</span></div>
-            <div class="stat-box"><span class="stat-num" id="followerCountLabel">0</span><span class="stat-label">followers</span></div>
-            <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">following</span></div>
-          </div>
-        </div>
-        <div class="bio-text">
-          <strong id="displayProfileName">N/TV</strong><br>
-          <span id="displayBioLines">Ek minute ka break?<br>viralaaba dekh!😲</span>
-        </div>
-        <div class="mood-widget" onclick="changeLiveMoodWidget()">
-          <span>🎧 Status:</span> <strong id="moodStatusLabel">Editing Naseeb Ka King Part 5 🔥</strong>
-        </div>
-        <div class="dashboard-box">
-          <h4>Professional dashboard</h4>
-          <p>Supabase Cloud Live Core Engines Active.</p>
-        </div>
-        <div class="action-btn-row">
-          <button class="ig-btn follow-btn-active" id="mainFollowBtn" onclick="toggleLiveFollower()">Follow</button>
-          <button class="ig-btn" onclick="openEditProfile()">Edit profile</button>
-          <button class="ig-btn" style="color:#ff4444;" onclick="handleSecureLogout()">Logout 🚪</button>
-        </div>
-      </div>
-      <div class="tab-icon-row">
-        <div class="active" id="tPosts" onclick="switchProfileTab('posts')">⌗ Grid</div>
-        <div id="tSaved" onclick="switchProfileTab('saved')">🔖 Bookmark</div>
-        <div id="tVIP" onclick="switchProfileTab('vip')" style="color:gold; font-weight:bold;">🎟️ VIP Vault</div>
-      </div>
-      <div class="ig-grid" id="profile-grid-ig"></div>
-      <div class="ig-grid" id="saved-grid-ig" style="display:none;"></div>
-      <div class="ig-grid" id="vip-grid-ig" style="display:none;"></div>
-    </div>
-
-    <div class="edit-modal" id="editProfileModal">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-weight:bold;">
-        <span style="color:#ff4444; cursor:pointer;" onclick="closeEditProfile()">Cancel</span>
-        <span>Modify Profile Data</span>
-        <span style="color:var(--accent); cursor:pointer;" onclick="saveProfileData()">Done</span>
-      </div>
-      <div class="input-group"><label>Username ID</label><input type="text" id="inputUsername" value="viralaaba"></div>
-      <div class="input-group"><label>Display Name</label><input type="text" id="inputProfileName" value="N/TV"></div>
-      <div class="input-group"><label>Bio Grid Lines</label><textarea id="inputBio" rows="3">Ek minute ka break?&#10;viralaaba dekh!😲</textarea></div>
-    </div>
-
-    <div class="bottom-nav">
-      <div class="nav-btn" onclick="openPage('home-page');">🏠</div>
-      <div class="nav-btn" onclick="openPage('explore-page');">🔍</div>
-      <div class="nav-btn" onclick="openPage('reels-page');">🎬</div>
-      <div class="nav-btn" onclick="openPage('upload-page');">➕</div>
-      <div class="nav-btn" onclick="openPage('profile-page');">👤</div>
-    </div>
-  </div>
-
-  <script>
-    const supabaseUrl = "https://lchtbjjlbivswlnxgdp.supabase.co";
-    const supabaseKey = "sb_publishable_YXO7AMCVlxeiYYbZNrYZ1g_UTc5oqoI"; 
-    
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    let currentUploadType = 'post';
-    let selectedMediaArray = [];
-    let lastTap = 0;
-    let clickCount = 0;
-    let activeStoryBase64 = null;
-    let storyTimer = null;
-    let activeVoiceMode = 'Normal';
-    let globalCloudUsersCache = [];
-
-    // ==========================================
-    // 🔐 SUPABASE MASTER AUTH ENGINE
-    // ==========================================
-    function checkSecureSessionIndex() {
-      const activeUser = localStorage.getItem('popx_active_user');
-      if (activeUser) {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-app-framework').style.display = 'block';
-        document.getElementById('topUsernameLabel').innerText = activeUser;
-        document.getElementById('inputUsername').value = activeUser;
-        
-        const savedFollowers = localStorage.getItem('popx_followers_' + activeUser) || "0";
-        document.getElementById('followerCountLabel').innerText = savedFollowers;
-
-        if (localStorage.getItem('popx_is_following_' + activeUser) === 'true') {
-          document.getElementById('mainFollowBtn').innerText = "Following";
-          document.getElementById('mainFollowBtn').classList.remove('follow-btn-active');
-        }
-
-        listenToLiveGlobalStreams();
-        fetchAllCloudUsersForSearch();
-      } else {
-        document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('main-app-framework').style.display = 'none';
-      }
-    }
-
-    async function handleSecureCloudAuth(actionType) {
-      const user = document.getElementById('authUsernameInput').value.trim().toLowerCase();
-      const pass = document.getElementById('authPasswordInput').value.trim();
-
-      if (!user || !pass) {
-        alert("Enter credentials! ❌");
-        return;
-      }
-
-      localStorage.setItem('popx_active_user', user);
-      localStorage.setItem('popx_local_pass_' + user, pass);
-      
-      let localProfiles = JSON.parse(localStorage.getItem('popx_supabase_profiles') || "[]");
-      if(!localProfiles.includes(user)) {
-        localProfiles.push(user);
-        localStorage.setItem('popx_supabase_profiles', JSON.stringify(localProfiles));
-      }
-
-      try {
-        await _supabase.from('users_profile').upsert({ username: user, status: "PopX Creator 🔥" });
-      } catch(e) {
-        console.log("Background cloud save queued.");
-      }
-
-      checkSecureSessionIndex();
-    }
-
-    function handleSecureLogout() {
-      if(confirm("Disconnect from Matrix? 🚪")) {
-        localStorage.removeItem('popx_active_user');
-        location.reload();
-      }
-    }
-
-    window.onload = function() { checkSecureSessionIndex(); };
-
-    // ==========================================
-    // 🌐 SUPABASE REALTIME CLOUD FEED STREAMS
-    // ==========================================
-    async function listenToLiveGlobalStreams() {
-      const feed = document.getElementById('live-feed');
-      const profileGrid = document.getElementById('profile-grid-ig');
-      const vipGrid = document.getElementById('vip-grid-ig');
-      const activeUser = localStorage.getItem('popx_active_user');
-
-      function buildFeedUI(dataArray) {
-        feed.innerHTML = "";
-        profileGrid.innerHTML = "";
-        vipGrid.innerHTML = "";
-        let postCount = 0;
-
-        dataArray.forEach(post => {
-          let slidesHTML = `<div class="carousel-slide"><img class="post-img" src="${post.media}"></div>`;
-          let vaultOverlayHTML = post.locked ? `<div class="vault-lock-overlay" id="v-${post.id}"><div class="premium-badge">🎟️ VIP LOCKED</div><button class="ig-btn follow-btn-active" style="padding:5px 15px;" onclick="document.getElementById('v-${post.id}').remove()">Unlock Node (Code: 1234)</button></div>` : '';
-
-          const card = document.createElement('div');
-          card.className = 'post-card';
-          card.innerHTML = `<div class="post-header"><div class="post-avatar">📺</div><div><b>${post.author}</b> <span class="blue-tick">🔵</span><div class="post-location">📍 ${post.location || 'PopX Universe'}</div></div></div><div class="carousel-view" onclick="handleDoubleTap('${post.id}')">${vaultOverlayHTML}${slidesHTML}</div><div class="post-actions"><div class="action-left"><span id="like-btn-${post.id}">🤍</span><span onclick="document.getElementById('box-${post.id}').style.display='block'">💬</span><button class="tip-btn" onclick="alert('10 Diamonds Sent! 💎')">Give Tip 💎</button></div></div><div style="padding:0 15px 5px 15px; font-size:12px; color:var(--ig-gray);">🎵 ${post.music}</div><div class="comment-box" id="box-${post.id}"><div class="comment-list" id="lst-${post.id}"></div><div class="comment-input-div"><input type="text" id="in-${post.id}"><button onclick="sendCloudComment('${post.id}')">Post</button></div></div><div style="padding:0 15px;"><b>${post.author}</b> ${post.caption}</div>`;
-          feed.appendChild(card);
-
-          if(post.author === activeUser) {
-            postCount++;
-            const item = document.createElement('div');
-            item.className = 'grid-item-ig';
-            item.style.backgroundImage = `url('${post.media}')`;
-            if(post.locked) {
-              item.innerHTML = `<div class="grid-badge-icon">🔒 VIP</div>`;
-              vipGrid.appendChild(item);
-            } else {
-              profileGrid.appendChild(item);
-            }
-          }
-        });
-        document.getElementById('postCountLabel').innerText = postCount;
-      }
-
-      try {
-        const { data, error } = await _supabase.from('broadcast_feed').select('*').order('id', { ascending: false });
-        if (!error && data && data.length > 0) {
-          localStorage.setItem('popx_supabase_feed', JSON.stringify(data));
-          buildFeedUI(data);
-        } else {
-          const localBackup = JSON.parse(localStorage.getItem('popx_supabase_feed') || "[]");
-          if(localBackup.length > 0) buildFeedUI(localBackup);
-          else feed.innerHTML = `<p style="text-align:center; color:#888; padding:40px; font-size:14px;">Connected to Supabase. Publish first item! 🚀</p>`;
-        }
-      } catch(e) {
-        const localBackup = JSON.parse(localStorage.getItem('popx_supabase_feed') || "[]");
-        buildFeedUI(localBackup);
-      }
-    }
-
-    async function publishMedia() {
-      if(selectedMediaArray.length === 0) return alert("Select files first!");
-      const activeUser = localStorage.getItem('popx_active_user');
-      const caption = document.getElementById('postCaption').value || "";
-      const location = document.getElementById('postLocation').value.trim();
-      const music = document.getElementById('postMusic').value.trim() || "Original Cloud Audio";
-      const isLocked = document.getElementById('lockPostToggle').checked;
-
-      const postObject = {
-        author: activeUser,
-        media: selectedMediaArray[0],
-        caption: caption,
-        location: location,
-        music: music,
-        locked: isLocked
-      };
-
-      let localFeed = JSON.parse(localStorage.getItem('popx_supabase_feed') || "[]");
-      localFeed.unshift(postObject);
-      localStorage.setItem('popx_supabase_feed', JSON.stringify(localFeed));
-
-      try {
-        await _supabase.from('broadcast_feed').insert([postObject]);
-      } catch(e) {
-        console.log("Cached to sandbox.");
-      }
-
-      alert("Successfully Published Live to Supabase Server! 🚀");
-      selectedMediaArray = [];
-      document.getElementById('postCaption').value = "";
-      document.getElementById('postLocation').value = "";
-      document.getElementById('postMusic').value = "";
-      document.getElementById('lockPostToggle').checked = false;
-      document.getElementById('uploadStatusText').innerText = "Open Studio Gallery";
-      document.getElementById('uploadStatusText').style.color = "#888";
-      
-      listenToLiveGlobalStreams();
-      openPage('home-page');
-    }
-
-    // ==========================================
-    // 🔍 INSTAGRAM STYLE SEARCH PEOPLE LIVE
-    // ==========================================
-    async function fetchAllCloudUsersForSearch() {
-      try {
-        const { data } = await _supabase.from('users_profile').select('username, status');
-        if(data) globalCloudUsersCache = data;
-      } catch(e) {
-        console.log("Using local cache memory index loop.");
-      }
-    }
-
-    function triggerLiveUserSearch(query) {
-      const container = document.getElementById('searchResultsContainer');
-      const cleanedQuery = query.trim().toLowerCase();
-
-      if (!cleanedQuery) {
-        container.innerHTML = `<p style="text-align:center; color:#555; padding:20px; font-size:13px;">Type username above to search live cloud profiles.</p>`;
-        return;
-      }
-
-      container.innerHTML = "";
-      let found = false;
-
-      globalCloudUsersCache.forEach(user => {
-        if(user.username.includes(cleanedQuery)) {
-          found = true;
-          createSearchUserElement(user.username, user.status);
-        }
-      });
-
-      let localProfiles = JSON.parse(localStorage.getItem('popx_supabase_profiles') || "[]");
-      localProfiles.forEach(localUser => {
-        if(localUser.includes(cleanedQuery) && !container.innerHTML.includes(localUser)) {
-          found = true;
-          createSearchUserElement(localUser, "PopX Local Creator 🟢");
-        }
-      });
-
-      if (!found) {
-        createSearchUserElement(cleanedQuery, "Active PopX Profile Verified 🟢");
-      }
-    }
-
-    function createSearchUserElement(username, statusText) {
-      const container = document.getElementById('searchResultsContainer');
-      const card = document.createElement('div');
-      card.className = 'search-user-card';
-      card.innerHTML = `
-        <div class="search-user-avatar">${username.charAt(0).toUpperCase()}</div>
-        <div class="search-user-info">
-          <div class="search-user-name">@${username} <span class="blue-tick">🔵</span></div>
-          <div class="search-user-status">${statusText}</div>
-        </div>
-        <button class="ig-btn follow-btn-active" style="padding: 6px 12px; font-size: 12px; max-width: 80px;" onclick="alert('Successfully followed @${username}! 👥')">Follow</button>
-      `;
-      container.appendChild(card);
-    }
-
-    function sendCloudComment(id) {
-      const activeUser = localStorage.getItem('popx_active_user');
-      const val = document.getElementById('in-' + id).value;
-      if(!val) return;
-      const cItem = document.createElement('div');
-      cItem.className = 'comment-item';
-      cItem.innerHTML = `<b>@${activeUser}:</b> ${val}`;
-      document.getElementById('lst-' + id).appendChild(cItem);
-      document.getElementById('in-' + id).value = "";
-    }
-
-    // ==========================================
-    // 🎭 OTHER FEATURES SYSTEMS MODULE
-    // ==========================================
-    function toggleLiveFollower() {
-      const activeUser = localStorage.getItem('popx_active_user');
-      let isFollowing = localStorage.getItem('popx_is_following_' + activeUser) === 'true';
-      isFollowing = !isFollowing;
-      const currentFollowers = isFollowing ? 1 : 0;
-      localStorage.setItem('popx_followers_' + activeUser, currentFollowers);
-      localStorage.setItem('popx_is_following_' + activeUser, isFollowing);
-      const btn = document.getElementById('mainFollowBtn');
-      btn.innerText = isFollowing ? "Following" : "Follow";
-      btn.classList.toggle('follow-btn-active', !isFollowing);
-      document.getElementById('followerCountLabel').innerText = currentFollowers;
-    }
-
-    function setVoiceMode(mode) {
-      activeVoiceMode = mode;
-      document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('v' + mode).classList.add('active');
-    }
-    
-    function sendVoiceDM() {
-      const txt = document.getElementById('dmInput').value.trim();
-      if(!txt) return;
-      const chatZone = document.getElementById('chatMessages');
-      if(chatZone.innerText.includes("Select filter and type")) chatZone.innerHTML = "";
-      const newMsg = document.createElement('div');
-      newMsg.style.marginBottom = "8px";
-      newMsg.innerHTML = `💬 <b>You (${activeVoiceMode}):</b> ${txt}`;
-      chatZone.appendChild(newMsg);
-      chatZone.scrollTop = chatZone.scrollHeight;
-      document.getElementById('dmInput').value = "";
-    }
-
-    function openPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
-    }
-    function toggleNeonAuraTheme() { document.body.classList.toggle('neon-theme'); }
-    function changeLiveMoodWidget() {
-      const moods = ["Editing Naseeb Ka King Part 5 🔥", "Cloud Active 🎧", "Naad Khula Crew Active 🚀"];
-      const cur = document.getElementById('moodStatusLabel').innerText;
-      document.getElementById('moodStatusLabel').innerText = moods[(moods.indexOf(cur) + 1) % moods.length];
-    }
-    function triggerAICaption() {
-      const caps = ["Naseeb Ka King, Market Me In! 👑🔥", "Ek minute ka break, viralaaba dekh! 😲🎬", "Direct Supabase cloud server sync! ⚡🚀"];
-      document.getElementById('postCaption').value = caps[Math.floor(Math.random() * caps.length)];
-    }
-    function openEditProfile() { document.getElementById('editProfileModal').classList.add('open'); document.getElementById('modalBackdrop').style.display = 'block'; }
-    function closeEditProfile() { document.getElementById('editProfileModal').classList.remove('open'); document.getElementById('modalBackdrop').style.display = 'none'; }
-    function saveProfileData() { document.getElementById('displayProfileName').innerText = document.getElementById('inputProfileName').value; closeEditProfile(); }
-    function setUploadType(type) { currentUploadType = type; document.getElementById('fileInput').multiple = (type === 'post'); }
-    function mediaSelected(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { selectedMediaArray = [e.target.result]; document.getElementById('uploadStatusText').innerText = "✓ Armed"; document.getElementById('uploadStatusText').style.color = "#00f2fe"; }; reader.readAsDataURL(input.files[0]); } }
-    function handleDoubleTap(postId) { const now = Date.now(); if ((now - lastTap) < 300) { document.getElementById('like-btn-' + postId).innerText = "❤️"; } lastTap = now; }
-    function playLiveStory() { if(!activeStoryBase64) return alert("Upload a story first!"); const viewer = document.getElementById('storyViewerZone'); document.getElementById('storyViewerImg').src = activeStoryBase64; viewer.style.display = 'flex'; setTimeout(() => { document.getElementById('storyProgBar').style.width = '100%'; document.getElementById('storyProgBar').style.transition = 'width 5s linear'; }, 50); storyTimer = setTimeout(() => { closeStoryView(); }, 5050); }
-    function closeStoryView() { document.getElementById('storyViewerZone').style.display = 'none'; document.getElementById('storyProgBar').style.transition = 'none'; document.getElementById('storyProgBar').style.width = '0%'; clearTimeout(storyTimer); }
-    function uploadStoryLocal(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { activeStoryBase64 = e.target.result; document.getElementById('myStoryIcon').innerText = ""; document.getElementById('myStoryIcon').style.backgroundImage = `url('${activeStoryBase64}')`; alert("Story Online! 📸"); }; reader.readAsDataURL(input.files[0]); } }
-    function triggerAdminPanel() { clickCount++; if(clickCount === 3) { document.getElementById('profileGlobalTick').innerHTML = `<span class="blue-tick">🔵</span>`; alert("Ecosystem Nodes Verified! Blue Tick Enabled 🔵"); } setTimeout(() => { clickCount = 0; }, 3000); }
-    function switchProfileTab(tab) { document.getElementById('profile-grid-ig').style.display = tab === 'posts' ? 'grid' : 'none'; document.getElementById('saved-grid-ig').style.display = tab === 'saved' ? 'grid' : 'none'; document.getElementById('vip-grid-ig').style.display = tab === 'vip' ? 'grid' : 'none'; }
-  </script>
-</body>
-</html>
+        </d
